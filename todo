@@ -1,4 +1,5 @@
-Seperate build and src dirs
+1) Seperate build and src dirs
+2) Fixed length c types 
 
 
 Unit test for loader and dumpers.
