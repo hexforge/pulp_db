@@ -1,5 +1,10 @@
 pulp_db
 
+AIM:  To capture and query large data.
+
+Realtime capture.  Offline compression.
+
+
 NoSQL db for:
      * jagged  
      * ordered/realtime
@@ -27,4 +32,17 @@ Targeting:
     High write throughput:   Two stage process to acchive this.  1) Capture and do little.  2) Offline optimise [lots more todo here].
     Super fast read queries.  [More todo here, pushing more to c]
         Low memory use for read mode.  Streaming results.
+
+
+BUILDING
+    todo
+
+TESTING
+    todo
+
+INSTALLING
+    todo
+
+USING
+    todo
 
