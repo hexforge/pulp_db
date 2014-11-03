@@ -1,0 +1,30 @@
+# Need to reuse specs.
+
+bsebcast.ini      
+krxequities.ini  
+omdf.ini
+cmemdpitc.ini    
+nasdaq_qbbo.ini  
+ose.ini
+utpcasheuro.ini
+global_index.ini
+nysertrpxdp.ini
+russelltick.ini
+hkseomd.ini
+
+##########################################################
+
+A parser is a decision tree.
+
+Once we know the branch we can generate a specialized parser.
+This parser can be lazy and only execute based on what is needed. 
+While caching.
+
+##########################################################
+
+Decoder interface
+
+Get it
+Give it message, it returns the struct.
+
+Now think about clean up and getting rid of data.  

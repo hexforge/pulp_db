@@ -1,0 +1,13 @@
+interface 
+
+
+open
+append
+close
+
+
+0100010001
+
+0123456789
+
+Would mean references 1,5,9 

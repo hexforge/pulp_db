@@ -1,0 +1,47 @@
+A table trie turns first_trie  trie into something more persistable and more compact.
+
+We do this by using offsets.  
+By using tails (inter trie tails too).
+By separating the values out of a normal node.  If a node has a value and children it points to the value table then that position points to the children table as before.
+By reusing keys, table names between different levels of nodes.
+
+
+# A table trie is most easily constructed done when we have all information.
+
+# A table trie is good for small tables.  
+    # Bit pack tables are better for heavy populated ones 0110111101110 # Value filter 
+    # All trie is good if all values filled in.
+
+
+# Table format
+
+Width | l1, l2
+table_row, table_row
+padding out to to nearest 4 bytes is possible.  Flags are in the rows. Or we used special values instead of flags.
+
+First two tables are special value tables.
+
+just value table
+passthrough with tails value
+
+##################################################################
+
+# No longer does every node have both a value and a pointer.
+
+# table_id, row_id
+# null table can contain whatever. Can expand this to the complete meta data.
+
+Should this be top down or bottom up for converting?
+
+Table names are null terminated.
+Reduce the first fieldkey_offset to zero.
+Each node is basically a row entry in some table.
+A table has a length. len string.  (firstfield is offset.)
+
+Write the tables in memory.
+We know how many tables we have.
+
+table_number = findmake('table_name')  # new_or_existing
+table_name = get_table_name(table_number)
+row_number = new_row(table_number)
+row* = current_row_address(table_number, row_number)      # This is temperoal data.  rows can be relocated.

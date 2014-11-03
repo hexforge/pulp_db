@@ -1,0 +1,212 @@
+#include <stdio.h>
+#include <unistd.h>  //contains read
+#include <sys/stat.h> // http://linux.die.net/man/3/open
+#include <fcntl.h>    // http://linux.die.net/man/3/open
+#include <string.h>   // memcpy
+#include <stdlib.h>   //exit
+
+/*
+#include <sys/time.h>
+#include <sys/types.h>
+#include <sys/mman.h>
+*/
+
+/*---
+DATA
+---*/
+#define BLOCKSIZE 4096
+#define MAX_MSG_SIZE (1024*1024)
+#define NUM_BLOCKS_IN_BUFFER (32*1024)
+#define NUM_BLOCKS_IN_MAXMSG 256
+#define NUM_MAXMSG_IN_BUFFER 128
+#define BUFFER_SIZE (NUM_BLOCKS_IN_BUFFER*BLOCKSIZE)
+
+// This warns of the disconitinutit. Leave enough room for at least one.
+#define HIGH_BOUNDARY ((NUM_MAXMSG_IN_BUFFER-1)*NUM_BLOCKS_IN_MAXMSG*BLOCKSIZE)
+
+static int fd;
+static unsigned long max_offset = 0;
+static unsigned char buffer[BUFFER_SIZE];
+static unsigned long start_offset = 0;
+static unsigned char *freed_up_to = buffer+BUFFER_SIZE;   // points to the first in use address
+
+/*---
+FUNCTIONS
+---*/
+static void handle_read_fail(void);
+void handle_read_fail()
+{
+    close(fd);
+    perror("Error reading the file");
+    exit(1);
+}
+
+static void handle_fill_fail(void);
+void handle_fill_fail()
+{
+    close(fd);
+    perror("Error filling the buffer");
+    exit(1);
+}
+
+static int copy_x_block_into_buffer(char *buffer, const int offset, const unsigned int num_blocks);
+int copy_x_block_into_buffer(char *buffer, const int offset, const unsigned int num_blocks)
+{
+    extern int fd;
+    extern unsigned long max_offset;
+    extern unsigned long start_offset;
+    ssize_t read_amount;
+    ssize_t actual_eof;
+    ssize_t expected_eof;
+
+    int i;
+    //printf("num blocks in buffer %d\n", num_blocks);
+
+    char *target_buffer;
+    target_buffer = buffer + offset;
+    for(i=0; i<num_blocks; ++i)
+    {
+        read_amount = read(fd, target_buffer, BLOCKSIZE);
+        target_buffer += read_amount;
+
+        if (read_amount == -1)
+        {
+            handle_read_fail();
+        }
+        else if (read_amount!=BLOCKSIZE)
+        {
+            actual_eof = start_offset + read_amount + (i*BLOCKSIZE) + offset;
+            expected_eof = max_offset;
+
+            printf("max_offset='%ld' start_offset='%ld'\n", max_offset, start_offset);
+            if (actual_eof==expected_eof)
+            {
+                printf("Finished reading the file \n");
+                break;
+            }
+            else
+            {
+                // DEBUG <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+                //printf("%d read_amount%ld\n", i, read_amount);
+                //printf("Error expected EOF='%ld', actual EOF='%ld'\n", expected_eof, actual_eof);
+                // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+                handle_read_fail();
+            }
+        }
+    }
+    return 0;
+}
+
+static int init_buffer();     // What happens in the case we don't have enough data?
+int init_buffer()
+{
+    extern unsigned char buffer[];
+    copy_x_block_into_buffer(buffer, 0, NUM_BLOCKS_IN_BUFFER);
+    return 0;
+}
+
+static int fill();
+int fill()
+{
+    // This function needs freed_up_to-HIGH_BOUNDARY to make sense run the checks outside
+    extern unsigned char *freed_up_to;
+    // The second the free crosses the boundary we shift everything
+    if (freed_up_to>=buffer+HIGH_BOUNDARY)
+    {
+        memcpy(buffer, buffer+HIGH_BOUNDARY, MAX_MSG_SIZE);
+        start_offset += HIGH_BOUNDARY;
+        freed_up_to = (freed_up_to-HIGH_BOUNDARY);
+        copy_x_block_into_buffer(buffer, MAX_MSG_SIZE, NUM_BLOCKS_IN_BUFFER-NUM_BLOCKS_IN_MAXMSG);
+        return 0;
+    }
+    else
+    {
+        printf("ERROR: freed_up_to='%p', buffer='%p', HIGH_BOUNDARY='%d'", freed_up_to, buffer, HIGH_BOUNDARY);
+        handle_fill_fail();
+    }
+}
+
+int cfbuf__setup(const char *file_path)
+{   
+    //open the file
+    extern int fd;
+    fd = open(file_path, O_RDONLY);
+    if (fd == -1) 
+    {
+        perror("Error opening file for reading");
+        exit(EXIT_FAILURE);
+    }
+
+    //find bum bytes in file
+    extern unsigned long max_offset;
+    max_offset = lseek(fd, 0L, SEEK_END);
+    unsigned long curpos = lseek(fd, 0L, SEEK_SET);
+
+    //Fill the buffer
+    init_buffer();
+
+    return 0;
+}
+
+int cfbuf__close(void)
+{
+    if (close(fd) == -1) 
+    {
+        perror("Error closing the file");
+    }
+    close(fd);
+    return 0;
+}
+
+int cfbuf__get_data(unsigned char **target, const unsigned long offset, const unsigned int min_length)
+{
+    extern unsigned long start_offset;
+    extern unsigned long max_offset;
+
+    if (min_length>MAX_MSG_SIZE)
+    {
+        printf("Requested too much data\n");
+        exit(1);
+    }
+    if (offset<start_offset)
+    {
+        printf("Something has gone wrong offset='%ld' start_offset='%ld'\n", offset, start_offset);
+        exit(1);
+    }
+
+    *target = buffer+offset-start_offset;
+    if (offset+min_length>max_offset)
+    {
+        return max_offset-offset;
+    }
+    else
+    {
+        return min_length;
+    }
+
+}
+
+int cfbuf__free_data(const unsigned long offset_to)
+{
+    extern unsigned char *freed_up_to;
+    extern unsigned char buffer[];
+    extern unsigned long start_offset;
+
+    if (offset_to<start_offset)
+    {
+        printf("Something has gone wrong offset_to='%ld' start_offset='%ld'\n", offset_to, start_offset);
+        exit(1);
+    }
+
+    freed_up_to = buffer + (offset_to - start_offset);
+    if (offset_to-start_offset>HIGH_BOUNDARY)
+    {
+        // DEBUG: <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+        //printf("freed_up_to='%p', buffer='%p', HIGH_BOUNDARY='%d'\n", freed_up_to, buffer, HIGH_BOUNDARY);
+        //printf("offset_to='%ld', start_offset='%ld'\n", offset_to, start_offset);
+        //printf("-------------\n");
+        // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        fill();
+    }
+    return 0;
+}

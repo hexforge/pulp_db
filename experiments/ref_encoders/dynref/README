@@ -1,0 +1,17 @@
+The rtrie stores stuff like name -> id
+
+Id is a index of a list of message counts.
+This list of message counts is used when moving the the second stage to allocate space efficently.
+
+
+SO what we need is a way of witha very high throughput storing the refs. dpref wastest too much space.
+
+We will know the id high.  So we know the global domain.  If there are only 1000keys then we can use 10bits to store each.  
+If it is one to one we can use poition to store the message ref.
+
+
+Doing this all will drastically reduce memory use.  At the moment each key stores
+struct dpref__buffer *buffers; Each element is 24bytes long.  Here we at most only need 
+say 5 bytes to store more than a trillion messasges.
+
+At the moment in dref we use 4kb min per key, which is sutip

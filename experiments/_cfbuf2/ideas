@@ -1,0 +1,65 @@
+#include <stdio.h>
+
+#define READSIZE (4*1024)
+#define BUFFSIZE ()
+
+# What happens at buffer boundaires?
+
+int main()
+{
+    FILE *fp;
+    unsigned char buffer[READSIZE] = 
+}
+
+
+# Max message size is 20bits = 1mb.
+# Say we use a continous buffer.
+# 100mb this reduces the number of times we need to copy data to keep continous in memory.
+#Fixed boundaires.
+#  #  #  #  # redzone 1mb #
+# If we hit the red zone, we need to reset back to the start we must rewrite all the blocks in red into start.
+# All we need in this system is one pointer to current.  And an an aggreed boundary.
+# It would be nice to have a second pointer where was ok from. Really this is just the first pointer at a agreed point.
+# Everytime pointer passes through abounday a page copy must take place.
+
+
+#  This is very easy
+
+# Configurable number of labels to protect.
+# Configurable pagesize.
+# Configurable Number of pages.
+# Configurable max message size.
+
+# from_get(from, number)   # Most of the time we already buffered this much.  If from is in red zone it do a transform. 
+# label(from, too)         # We know to protect this segment. (Is this needed?)
+
+#How todo a transform
+#We move from lowest protected block nearest
+
+    num_full_blocks = (filesize/BLOCKSIZE)
+    for (block_num=0; block_num<=num_full_blocks; ++block_num)
+
+
+#######################################################################################################
+
+# Always will have boundary problems regardless of block size.
+# However having a block size such that 2blocks cover the max messages size works ok. If we roll.
+
+Make 100mb block.  In theory this can be filled in the background. Would need a third pair.
+# Only read
+# Blocksize >= max_messagesize
+
+S# || # # # # # # # # # # # || E#
+
+
+
+Countinous data block S to E.
+1st read is slightly different? No just has end unset :)
+
+
+When a message offset starts in E, so last one ends at or in E.  We do a read from S up to the E boundary.
+We then countinue as normal.
+Everything is offset.
+Need to store:
+    We know the total byte length of the continuous block.
+    We only need two values.  For each boundary.  Offset + pointer.

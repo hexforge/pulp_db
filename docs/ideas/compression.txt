@@ -1,0 +1,40 @@
+http://stackoverflow.com/questions/1820144/opening-gzipped-files-for-reading-in-c-without-creating-temporary-files
+http://stackoverflow.com/questions/5442949/extracting-gzip-data-using-c
+
+
+Say we have a 5gb playback compressed.  That is 50gb uncompressed flat file.
+I’m guessing then the flat file will need to support compression.
+
+Biggest playbacks in /playback (biggest 32gb compressed)
+4344233984 Feb 22 2013 ./automation/ci-environment/utpcasheuro/12072012/utpcasheuro.20120712.pb.gz
+4408843284 Mar 1 2013 ./hkex/production/20130227/merge/AMS_All_20130227
+4412825600 Oct 17 2012 ./hkex/load/ams-cap-volumn_20121012.tar
+4598607762 Feb 21 2013 ./xetraebs/DFH-22003/xetraebs_1.play20130128
+4722911579 Feb 8 2013 ./hkex/production/20130117/merge/AMS_All_20130117.dump
+4729901066 Feb 8 2013 ./hkex/production/20130125/merge/AMS_All_20130125
+4859894662 Nov 9 2012 ./etrade/playbacks/opra_5_6_20121108.play.gz
+5001909606 Feb 6 2013 ./hkex/production/20130123/merge/AMS_All_20130123
+5149339336 Feb 7 2013 ./hkex/production/20121212/merge/AMS_All_20121212
+5264028756 Feb 8 2013 ./hkex/production/20130122/merge/AMS_All_20130122
+5325682826 Feb 7 2013 ./hkex/production/20130111/merge/AMS_All_20130111
+5890948480 Feb 8 2013 ./hkex/production/20130117/merge/AMS_All_20130117
+6181300678 Jan 16 2013 ./etrade/playbacks/tvitch4mc_am_20130111.play.gz
+7762350080 Feb 6 2013 ./hkex/fuat/hkex-489/logs/core.11371
+12461995516 Feb 4 2013 ./bpipe.play.gz
+13444775936 Mar 13 2013 ./umdf2/puma_prod_mbo.pb.gz
+16326438912 Mar 8 2013 ./cmemdpfix/cmemdpfix_20130306_1.pb.gz
+21789791646 Feb 27 2013 ./tsx/playbacks/tsx_north.play.20110722.trade
+25153638938 Feb 26 2013 ./hkex/backup/lianlong-desktop-backup2013.tgz
+32733281491 Mar 12 2013 ./cmemdpfix/cmemdpfix_20130306_2.pb.gz
+
+
+If flat file is index with offset, and size.  Any data between blocks is irrelevant to read speed. Things like metadata would be skipped over.
+So if the pb was uncompressed.   Ignoring cache hits (Could be important), it would be the same speed even with filler.
+
+The thing that could hit us is gzip block decompression might cost us depending how big it is compared to how big a message is. Might have to say on a boundary uncompress two blocks to get a message, and throw the majority of data away.
+
+Random access to a gzip file.
+http://svn.ghostscript.com/ghostscript/tags/zlib-1.2.3/examples/zran.c
+http://stackoverflow.com/questions/429987/compression-formats-with-good-support-for-random-access-within-archives
+
+All I know is that it is possible and saves an extra big file.  Indexing will cost us quite a large amount of space.

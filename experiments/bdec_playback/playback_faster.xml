@@ -1,0 +1,100 @@
+<protocol>
+    <sequenceof name="playback">
+        <reference name="playback_packet" />
+    </sequenceof>
+
+    <common>
+        <sequence name="playback_packet">
+            <reference name="metaheader" />
+            <field name="payload" type="binary" length="${metaheader.payload_length} * 8"/>
+            <field type="integer" length="8" value="10" />
+        </sequence>
+
+        <sequence name="metaheader">
+            <field name="metaheader_start:" type="text" length="19 * 8"/> <!--value="*M*E*T*A*S*T*A*R*T*" -->
+            <field name="irrelevent" type="text" length="24"/>            <!-- value="/4/" -->
+            <reference name="payload_length" type="digits" />
+            <field name="sep3:" length="8" type="text" />                 <!--value="/" -->
+            <reference name="playback_ip" type="slashstring" />
+            <reference name="port" type="slashstring" />
+            <field name="irrelevent" length="112" type="text" />          <!--value="hh:mm:ss:mss/" -->
+            <reference name="timestamp" type="slashstring" />
+
+            <field name="irrelevent" length="8" type="text" />             <!-- value="/" --> 
+
+            <field name="metaheader_end:" type="text" length="15 * 8" />   <!-- value="*M*E*T*A*E*N*D*" -->
+        </sequence>
+
+        <sequenceof name="slashstring">
+            <choice name="entry">
+                <field name="null" length="8" value="0x2f"><end-sequenceof /></field>
+                <field name="c" length="8" type="text" />
+            </choice>
+        </sequenceof>
+        
+        <sequence name="digit" value="${char:} - 48">
+            <field name="char:" length="8" type="integer" min="48" max="58" />
+        </sequence>
+
+        <sequence name="two digits" value="${digit 1:} * 10 + ${digit 2:}">
+            <reference name="digit 1:" type="digit" />
+            <reference name="digit 2:" type="digit" />
+        </sequence>
+
+        <sequence name="three digits" value="${digit 1:} * 10 + ${digit 2:}">
+            <reference name="digit 1:" type="two digits" />
+            <reference name="digit 2:" type="digit" />
+        </sequence>
+
+        <sequence name="four digits" value="${digit 1:} * 10 + ${digit 2:}">
+            <reference name="digit 1:" type="three digits" />
+            <reference name="digit 2:" type="digit" />
+        </sequence>
+
+        <sequence name="five digits" value="${digit 1:} * 10 + ${digit 2:}">
+            <reference name="digit 1:" type="four digits" />
+            <reference name="digit 2:" type="digit" />
+        </sequence>
+
+        <sequence name="six digits" value="${digit 1:} * 10 + ${digit 2:}">
+            <reference name="digit 1:" type="five digits" />
+            <reference name="digit 2:" type="digit" />
+        </sequence>
+
+        <sequence name="seven digits" value="${digit 1:} * 10 + ${digit 2:}">
+            <reference name="digit 1:" type="six digits" />
+            <reference name="digit 2:" type="digit" />
+        </sequence>
+
+        <sequence name="eight digits" value="${digit 1:} * 10 + ${digit 2:}">
+            <reference name="digit 1:" type="seven digits" />
+            <reference name="digit 2:" type="digit" />
+        </sequence>
+
+        <sequence name="nine digits" value="${digit 1:} * 10 + ${digit 2:}">
+            <reference name="digit 1:" type="eight digits" />
+            <reference name="digit 2:" type="digit" />
+        </sequence>
+
+        <sequence name="ten digits" value="${digit 1:} * 10 + ${digit 2:}">
+            <reference name="digit 1:" type="nine digits" />
+            <reference name="digit 2:" type="digit" />
+        </sequence>
+
+        <sequence name="digits" value="${digits:}">
+            <choice name="digits:">
+                <reference name="ten digits" />
+                <reference name="nine digits" />
+                <reference name="eight digits" />
+                <reference name="seven digits" />
+                <reference name="six digits" />
+                <reference name="five digits" />
+                <reference name="four digits" />
+                <reference name="three digits" />
+                <reference name="two digits" />
+                <reference name="digit" />
+            </choice>
+        </sequence>
+    </common>
+</protocol>
+

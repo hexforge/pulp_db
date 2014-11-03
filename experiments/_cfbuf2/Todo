@@ -1,0 +1,4 @@
+This is a more general approach.
+Allows locking of sections.
+int cfbuf__free_data(const unsigned long offset_from, const unsigned long offset_to);  
+

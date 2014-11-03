@@ -1,0 +1,283 @@
+int diff ref
+
+
+
+open
+append
+close
+
+
+3
+5
+9
+
+
+
+3+2+4
+Saves some of the zeros of the longlong int
+
+
+
+
+
+# Remeber this is to be composed in to data.
+class MsgRefs():
+    """
+    References could fill memory
+    We can know lots of meta precalculated stuff.
+    In c this will be meta and lots of blocks of encoded data.
+    We don't want to needlessly decode blocks.
+          So every block has meta, high and low and number within.
+    AND is intersection.  intersection is pretty much lookups of
+     get_eq_or_gt_(msg_num), can use the return val for next value.
+    OR is a merge. merging is pretty much iterating.
+    A db can be queried many times. 
+    If it gets queried many times at same time 
+    each qeuery should have it's own buffer so we 
+    don't keep over writting the buffer.
+    Views store meta_block state read from the db.
+    Views get updated with the new block state.
+
+
+    We could buffer blocks incase the get requested again.
+    We could reuse all the meta blocks between Queries. 
+    Same memory. Pointer in c.
+    """
+    def __init__(self, msg_nums):
+        # Here we split it into blocks cause that is how the 
+        # c will provide data to us.
+        self.data = _ignore_this_split_data(msg_nums)
+        self.meta = {}
+        self.meta['len'] = len(msg_nums)
+        self.meta['ref_min'] = msg_nums[0]
+        self.meta['ref_max'] = msg_nums[-1]
+
+        self.meta['num_blocks'] = len(self.data)
+        self.meta['Average_per_block'] = (self.meta['len']
+                                          / self.meta['num_blocks'])
+    
+    def __len__(self):
+        return self.meta['len']
+
+    def get_meta_block(self, block_id):
+        if 0 <= block_id < self.meta['num_blocks']:
+            return self.data[block_id][0]
+        else:
+            raise IndexError("Block_id={}, out of range".format(block_id))
+
+    def get_decoded_block(self, block_id):
+        if 0 <= block_id < self.meta['num_blocks']:
+            return self.data[block_id][1:]
+        else:
+            raise IndexError("Block_id={}, out of range".format(block_id))
+
+    def linear_search_metas_for_i(self,
+                                  index,
+                                  low_block_id=None, 
+                                  high_block_id=None):
+        i = low_block_id
+        while i <= high_block_id:
+            meta = self.get_meta_block(i)
+            next_block_start = (meta.block_start_i 
+                                + meta.block_len)
+            if meta.block_start_i <= index < next_block_start:
+                return i
+
+            i += 1
+        return -1
+
+    def search_metas_for_i(self, 
+                           index, 
+                           low_block_id=None, 
+                           high_block_id=None):
+        # Most i searches will be just go to next block.
+
+        if low_block_id is None:
+            low_block_id = 0
+        try:
+            low_block = self.get_meta_block(low_block_id)
+        except IndexError:
+            return -1
+        i_min = low_block['start_i']
+        if i_min <= index < (low_block['start_i'] + low_block['len']):
+            return low_block_id
+        
+        if high_block_id is None:
+            high_block_id = self.meta['num_blocks']-1
+        try:
+            high_block = self.get_meta_block(high_block_id)
+        except IndexError:
+            return -1
+        i_max = high_block['start_i'] + high_block['len']
+        if i_max <= index < (low_block['start_i'] + low_block['len']):
+            return high_block_id
+
+        number_of_blocks = high_block_id - low_block_id
+        number_of_messages_in_interval = i_max - i_min
+        self.meta['Average_per_block'] = (number_of_messages_in_interval
+                                          / number_of_blocks)
+        predicted_block_increment = ( (index-i_min) 
+                                    / self.meta['Average_per_block'])
+
+        predicted_block_id = low_block_id + predicted_block_increment
+        try:
+            predicted_block = self.get_meta_block(high_block_id)
+        except IndexError:
+            return -1
+
+        #N.B Continous quantity.
+        next_block_start = (predicted_block['start_i'] 
+                            + predicted_block['len'])
+        if predicted_block['start_i'] <= index < next_block_start:
+            return predicted_block_id
+        elif index < predicted_block['start_i']:
+            return self.linear_search_metas_for_i(index, 
+                                                  low_block_id+1, 
+                                                  predicted_block_id-1)
+        elif index > predicted_block.block_start_i + predicted_block['len']:
+            return self.linear_search_metas_for_i(index, 
+                                                  predicted_block_id+1, 
+                                                  high_block_id-1)
+        else:
+            raise NotImplementedError("Is not possible")
+
+    # All data is binary all data is sortable.
+    def search_metas_for_x(self, 
+                           value, 
+                           low_block_id=None, 
+                           high_block_id=None):
+
+        # Here a binary search for value
+        if low_block_id is None:
+            low_block_id = 0
+        if high_block_id is None:
+            high_block_id = self.meta['num_blocks']-1
+
+        high = high_block_id
+        low = low_block_id
+
+        while True:
+            if low > high:
+                break
+
+            pivot_id = (high-low)//2
+            pivot = self.get_meta_block(pivot)
+            if pivot['min'] <= value <= pivot['max']:
+                return pivot_id
+            if value > pivot['max']:
+                low = pivot + 1
+            else:
+                high = pivot -1
+
+        return -1
+
+    def search_block_for_gteq_x(self, block, x):
+        index = 0
+        for val in block:
+            if val >= x:
+                return index, val 
+
+            index += 1
+        return -1, -1
+
+        #index = bisect.bisect(the_list, the_key) 
+        #if index > 0 and the_list[index -1] == the_key:
+        #    return True
+        #else:
+        #    return False
+
+
+    def _new_view(self, view, block_id):
+        view = RefView()
+        view.block = self.get_decoded_block(block_id)
+        view.block_meta = self.get_meta_block(block_id)
+        view.block_id = block_id
+        view.block_start_i = view.block_meta['start_i']
+        view.block_len = view.block_meta['len']
+        view.block_low = view.block_meta['min']
+        view.block_high = view.block_meta['max']
+        return view
+
+    def geti(self, view, index):
+        # Jumps to index and returns it.
+        if view.block is None:
+            block_id = self.search_metas_for_i(index)
+            if block_id < 0:
+                #print("Couldn't find block")
+                return -1
+            view.__dict__.update(self._new_view(view, block_id).__dict__)
+
+        if  view.block_start_i < index < (view.block_start_i + view.block_len):
+            pass
+        elif index > view.block_start_i + view.block_len:
+            block_id = self.search_metas_for_i(index, low_block_id=view.block_id+1)
+            if block_id < 0:
+                #print("Couldn't find block")
+                return -1
+            view.__dict__.update(self._new_view(view, block_id).__dict__)
+        else:
+            block_id = self.search_metas_for_i(index, high_block_id=view.block_id-1)
+            if block_id < 0:
+                #print("Couldn't find block")
+                return -1
+            view.__dict__.update(self._new_view(view, block_id).__dict__)
+
+        view.current_i = index
+        view.current_val = view.block[index]
+        return view.current_val
+
+    def get_gteqx(self, view, x):
+        # Return value equal or greater than.
+        #import pdb
+        #pdb.set_trace()
+
+        if view.block is None:
+            block_id = self.search_metas_for_x(x)
+            if block_id < 0:
+                #print("Couldn't find block")
+                return -1
+            view.__dict__.update(self._new_view(view, block_id).__dict__)
+
+        if  view.block_low <= x <= (view.block_high):
+            pass
+        elif x > view.block_high:
+            block_id = self.search_metas_for_x(x, low_block_id=view.block_id+1)
+            if block_id < 0:
+                #print("Couldn't find block")
+                return -1
+            view.__dict__.update(self._new_view(view, block_id).__dict__)
+        else:
+            block_id = self.search_metas_for_x(x, high_block_id=view.block_id-1)
+            if block_id < 0:
+                #print("Couldn't find block")
+                return -1
+            view.__dict__.update(self._new_view(view, block_id).__dict__)
+        
+        in_block_index, gteq_x = self.search_block_for_gteq_x(view.block, x)
+        if in_block_index == -1:
+            return -1
+
+        view.current_i = in_block_index + view.block_start_i # Pos in block
+        view.current_val = gteq_x                            # last_read_value
+        return gteq_x
+
+    def next_msgi(self, view):
+        # Return next i
+        if view.block is None:
+            block_id = 0
+            view.__dict__.update(self._new_view(view, block_id).__dict__)
+            return self.geti(view, block_id)
+        elif view.current_i is None:
+            return self.geti(view, view.block_start_i)
+        else:
+            return self.geti(view, view.current_i+1)
+
+    def prev_msgi(self, view):
+        if view.block is None:
+            block_id = len(self-1)
+            view.__dict__.update(self._new_view(view, block_id).__dict__)
+            return self.geti(view, block_id)
+        elif view.current_i is None:
+            return self.geti(view, view.block_start_i + view.block_len)
+        else:
+            return self.geti(view, view.current_i-1)

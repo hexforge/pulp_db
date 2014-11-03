@@ -1,0 +1,31 @@
+Block based version of double array trie.  The aim is to not have to repeat check sources all over the place.
+
+It like a radix trie as if a node only has one child then they packed into a tail.
+One one src trie and use a target trie this is enforced and saves us a byte.
+
+256 fixed width.  Pack others into same one.
+
+
+
+source table. As each node must have 2>= children.  We need to be able to address up to 128 parent nodes.
+128 elements each of 4 bytes.  3 bytes is a src table check. 1 byte is an source shift so we can pack different groups together.
+
+
+filter index
+256 elements of 1 byte each.  7bits can address 128.  1bit is a flag.
+
+target store
+256 elements of 4 bytes. (First 2 bits are a flag.)  Is an index if value, is a 3 byte table address if not.
+
+
+
+
+Better schme.
+
+filter flags:
+    flag in filter means message no message
+
+target store flags:
+    2flag   first flag: special message
+            second flag: means passthough
+

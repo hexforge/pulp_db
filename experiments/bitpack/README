@@ -1,0 +1,24 @@
+Bitpack
+=======
+
+This module is to compress the storage of offsets (unsigned long).
+Instead of storing
+offset
+offset
+offset
+...
+
+It stores 
+offset (64bits)
+size (20bits)
+size
+size
+size
+size
+size
+...
+offset
+size
+size
+
+# We need to compress down to 20bits store max message size, 40bits to store offset.

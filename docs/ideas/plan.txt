@@ -1,0 +1,37 @@
+
+Plan of attack::
+
+Investigation of the problem.
+
+0) Initial investigation: 
+    What has been done:
+        Wrote a python ini spec decoder. Supporting 10 feeds. bsebcast,krxequities,omdf,cmemdpitc,nasdaq_qbbo,ose,utpcasheuro,global_index,nysertrpxdp,russelltick,hkseomd
+        Performance benchmarking of this against pypy, python2, python3, bdec python.
+
+1) c++ strip message out of playback.
+    What has been done:
+        Wrote a c meta parser.
+        Wrote a python meta parser.
+        Wrote three file backends mmbuf, fline, cfbuf
+        Did rough performance review
+        
+2) c++ store message in flat file.
+    What todo.
+        a) Get it working in mongo db
+        b) write a file file with msg_id index.
+        c) Performance benchmarking review
+
+3) Gather ideas and review direction.
+
+#########################################################################
+
+B)
+1) c++ strip message out of playback
+1a) possible filter
+2) decode message to json
+2a) possible filter
+3) select data to index
+4) store data in flat file db.  store(msg_data, {key,vals})
+5) Simple python interegrator
+6) json modifier
+7) Python injectore modifyier

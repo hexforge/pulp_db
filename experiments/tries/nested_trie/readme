@@ -1,0 +1,60 @@
+nested tries
+
+When you like about tries you realise they are just nested structures
+
+abc=3, abe=4, abcd=10, ad=15, adz=2
+
+
+{
+    [a]
+    {
+        [bd<15>]
+        {
+            [c<3>e<4>]
+            {
+                [d<10>]
+                {}
+            }
+
+            {
+            }
+            
+        }
+
+        {
+            [z<2>]
+            {}
+        }
+    }
+}
+
+
+We need to use escape codes as all char can appear in []
+/0 = {
+/1 = }
+/20 = 0
+/21 = 1
+
+###########################################################
+
+When expressed like this it is a serial read which doesn't scale
+So we start adding jumps.  So we can skip over subtries. (Can then stop using escape codes)
+So using pointers is a bit wastfull 8bytes.  If we use offsets we can use the same structure in memory and on disk.
+
+When you starting thinking about jumps you realise that most of the jumps are small at the tail of the trie.  The big jumps are are at the top with the huge subtries.
+
+The whole problem then starts lending itself to encodings, which the size of a number is variable.
+
+Simplest case. Jumping between two encodings. In our case we would be probably jumping between 3,5,8 bytes.
+
+00 = 0
+01 = 1
+10000000 = 2 
+10000001 = 3
+10000010 = 4
+
+
+#############################################################
+
+
+

@@ -1,0 +1,13 @@
+#Program('pulp_db.c')
+#Object('pulp_db.c')
+
+pulp_db_src = ['pulp_db.c']
+
+pulp_db_env = Environment()
+pulp_db_env.SharedLibrary(target='pulp_db', source=pulp_db_src)   #.so
+#pulp_db_env.Library(target='pulp_db', source=source_files)        #.a
+
+
+bitpack = Environment()
+bitpack.Library(target='bitpack', source=source_files)
+bitpack.Program(target='bitpack_test')

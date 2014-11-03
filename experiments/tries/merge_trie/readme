@@ -1,0 +1,26 @@
+
+[01010101010101001111]  256 binary elements
+Each say if bin == 1, key = bin_index
+for each 1 we store the transitions
+[t1, t2, ....]
+
+Now that is file but we can do better. we can merge 
+
+if we had two that complement each other completely
+0 could mean 'a', 1 could mean 'b' 
+but that would be rare to find complementing sets that fill every value.
+
+We can do do a best attempt for merging.
+keys ['a', 'd', 'q'], 0 neither, 1='a', 2='d', 3='q'
+
+[0,3,0,0,0,1,1,0,2.....]
+[t1, t2, t3, t4, t5, t6]  # Foreach non zero in above.
+
+We have reduced 256bits*4 to 256bits. And the number tables and hence table pointers.
+
+How to find complementing sets
+010101010 AND 101010110 == 0 No two elements have both got ones
+
+
+If we increase the domain to say charater pairs or triplets.
+Then we have fewer tables the same, and more room to merge tables together.

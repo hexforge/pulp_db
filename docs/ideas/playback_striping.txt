@@ -1,0 +1,26 @@
+//*M*E*T*A*S*T*A*R*T*/4/16/224.0.65.10/50005/00:20:09.177/1361406009.177703//*M*E*T*A*E*N*D*177703��S!
+
+In terms of playback striping.  
+
+Something along these lines was the orginal idea.  
+http://en.wikipedia.org/wiki/Knuth%E2%80%93Morris%E2%80%93Pratt_algorithm
+http://en.wikipedia.org/wiki/Boyer%E2%80%93Moore_string_search_algorithm
+And would be fast if all we cared about was the payload.   
+A dynamic trial and error jump table could be faster again can could be backed up by above.
+
+But after thinking about it we need size ip port and time.   
+The best I can think of is know the index of the first char of size, though it varies in string length.  
+We need ip and port which are just beside it but may also vary.  
+The raw time stamp is a fixed size away from there.  
+And the point of the data is a fixed size away from there.   
+
+
+
+
+# Continous buffer
+
+# Blocks which are bigger than max message size. 
+# We label when we have finsihed with a message.  If we start a message in the last block we remap everything and 
+# Start from the left side of the buffer.
+# 100mb this reduces the number of times we need to copy data to keep continous in memory.
+

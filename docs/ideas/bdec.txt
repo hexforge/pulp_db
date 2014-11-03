@@ -1,0 +1,24 @@
+I would say it too early to say it is “the solution”, it is a possible solution and an interesting 3rd party lib.  I don’t think the line was used with any ill intent, he was probably just trying to share credit, even though I haven’t done anything more than had a quick look bdec docs.   I haven’t looked at construct yet either, it can also generate c code as well, but it does so though a depreciated library which is bad.
+
+http://www.protocollogic.com/docs
+
+The questions I have.
+
+•   Performance.  Especially over choice branches and type conversion.
+•   What does the back end of the library look like. How does it map to c types?
+•   What is the c api like? The docs run out at this point.  
+•   What does a full feed spec look like.   Is it too verbose inelegant xml or is it ok?
+•   My attempt at solving the full problem 3 years ago failed, had to keep expanding the feature set of the specification.  Bdec looks a much more complete solution. But is it complete enough? Example:
+There are three main types of submessage iteration I have seen. 
+ Submessage count. Submessage till out of data. Submessage till footer. 
+
+•   How to handle where the message or payload is compressed using  lzo etc.
+•   Basically can the xml spec cover all needed cases?  If the library is missing a feature, do we need to hack it into the library? or can we intercept and handle special cases? Is ini + magic a better approach.  No need to pollute a super parser with one off hacks.  Or does the bdec solve the problem, having the benefit of having the full spec inside one file with no magic hidden elsewhere.
+•   How does the expression lib handle types?
+•   Encoding how does this work?
+•   How does it handle check digits, check sums, length fields in encoding?
+•   Confirm it be used in a streaming way from c?  (I think lee said it could)
+•   Can code come parsed be saved with a hint that will speed up parsing the second time as no need to go through any choices.
+•   Can we get a lazy parser from this?  I think it would be cool if a field is only parsed if selected (or maybe used), feedhandler skip lots of fields (flight recoder doesn’t need this, but is interesting still).
+
+Alastair

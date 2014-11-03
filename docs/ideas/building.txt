@@ -1,0 +1,2 @@
+http://tldp.org/HOWTO/Program-Library-HOWTO/shared-libraries.html
+http://www.scons.org/doc/HTML/scons-user.html

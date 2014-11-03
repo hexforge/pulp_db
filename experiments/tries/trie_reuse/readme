@@ -1,0 +1,33 @@
+The idea here is to have an array for all chars
+
+
+a | b | c | d | e | f | g | h | i | j | k | l | 
+  |   |   |   |   |   |   |   |   |   |   |   |
+
+
+We store the offsets for each 
+
+a -> b -> a -> c
+first a goes to b first b goes to second a second a goes to first c.
+
+We need to know every sub string that has already been difeined.
+As we add a new word if any part of the remaining word has been already defined (og sufficent length to be worth while) we reuse that.
+
+
+Look up suffix array bannana!!!!!!  To know what substrings to find.
+
+
+
+
+Think of data as
+
+|range where a prefix tree would work well|              = |^^^^^^^^^^|
+|range where it would not work well (uniq random)        = |xxxxxxxxxx|
+
+
+abcdefs &*^*&^&*^*&^*&^&*^&* yuighbj &&^*&^&*^&*^ wejioookk
+|^^^^^| |xxxxxxxxxxxxxxxxxx| |^^^^^| |xxxxxxxxxx| |^^^^^^^|
+
+We need to be able to reuse ranges where it is common and just array pack the bad regions.
+
+Repeating radox trie

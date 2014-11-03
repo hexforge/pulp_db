@@ -1,0 +1,17 @@
+The idea here is to anaylsis a trie and know what weights to give to differet binary elements.  We then can space out the known data to match and ahave a calculated hash function return that data.
+
+
+Can we do the same dymanically.
+
+
+
+Hash tables ussualy store, key, val at each hash address. Then we move through a bucket looking for the key once the expected position is calculated.
+
+
+In such an thing, order can be gureenteed.
+We don't need to store the key as the hash guarentees that each element will match.
+
+We really turnings a graph with a complex curve into a straight line.
+
+What we really want the is to somehow use all those spaces between data to actully mean something.
+

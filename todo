@@ -1,0 +1,90 @@
+Seperate build and src dirs
+
+
+Unit test for loader and dumpers.
+Add support for slicing.
+
+Look at copy cffi. Then could do much safer stuff.
+
+
+
+
+
+
+######################
+
+rtrie to index
+
+array [index to size]
+
+dynref
+
+block_type: sparse, 1bit, 2bit ... 8byte.
+
+
+array to array of offsets
+rtire to ttrie.
+can close ttrie.
+
+just need to gather lots of blocks and then write them to the offsets. Each block allocates against ids.  10101010  bit just message one 11|01|00|  3messages, etc
+
+dynref to
+
+
+##########################
+
+Would love to see a graph of pulp_db trie
+Domain size = N
+X is the number of strings to store.
+Is the data is randomly distrubuted each node generation will have X/N pieces of data flowing throught it.
+
+2 pices of data:  1/N chance of collision
+3 pices of data: 1/N + 9/10*2/N
+....
+
+Could have a log graph base N.  Need to see the frequnecy of saturation.
+How many tries are full, almost full.  How many tries are singletons.
+How many tries have x children.
+
+
+
+
+
+
+############################ 
+
+
+
+
+# If we did distributed computing what would it look like
+
+reader->spliter->distrubte->parse->store
+         -> could store where was split, need to provide with a offset.
+         -> distrubute 
+
+Splitting off the meta header is very little cost this could be done at the splitter end.
+All the machine would receive was a data chunk, which they could parse and store.
+
+# At the moment get data chunk func will be fine.  Data chunk will be numbered inside it already.
+
+#-----------------------
+
+0) Scons build system.
+
+1) Just store flat file. (Go with mmap, maybe re-factor it).  Pointer page, pointer page.
+    db_name.data
+
+2) Just flat file with msg_index. (64bits + 48*20bits per 1024) (max=1penta, max=1mb)
+    a) Fixed length index
+        can't store this all in memory, so need to write out as we go 
+        need to make efficient in size
+    db_name.index
+
+3) Do the same for mongo with flat
+4) Do the same for mongo with json  (can generate the json with the python decoder)
+5) Compare sizes and write and read and index
+
+6) Benchmark
+7) python interface pulp
+8) keys
+9) query language

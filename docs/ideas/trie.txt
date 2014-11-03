@@ -1,0 +1,61 @@
+For the problem of storing the data we have parsed before flushing to disk.  Especially the key store.
+
+Limited memory. Need to store lots of values for each field.
+Can we use a trie to be more space efficient as it re-ordered easy to merge.
+
+
+http://ww2.cs.mu.oz.au/~jz/fulltext/acmtois02.pdf
+
+
+
+Some kind of binary offset trie for keys in memory would be useful. Templating.
+We do not have enough memory in all cases to store all tries.  So merge will be needed.
+
+
+# For the problem of storing the data. Some kind of trie like strcuture that reuses common sections would be great.
+
+int -> char trie, will not know the path.
+
+
+
+
+
+
+Python dictionaries are know to be quite space expensive at large n. See memory usage http://incise.org/hash-table-benchmarks.html
+
+How python dicts are implemented
+http://stackoverflow.com/questions/327311/how-are-pythons-built-in-dictionaries-implemented
+
+Starts off with 8 buckets, resized if 2/3 full. (Think it doubles IIRC)
+
+Example data structure that is more memory efficient.
+http://en.wikipedia.org/wiki/Trie  (memory efficient storage of similar strings, but lookup slower)
+
+ 
+wLineTime12:12:12.123
+wLineTime12:12:12.124
+wLineTime12:12:12.124
+wLineTime12:12:12.125
+
+ 
+####################################################################
+
+XOR two way store. Linked list, half memory.
+
+####################################################################
+
+A <-> B <-> C
+
+D <-> B <-> E
+
+ 
+
+Path integral.  Depends on route you came from, rather than last place.
+
+ 
+
+Can half the memory cost with xor
+
+1 2 2 2 2 1
+
+1 1 1 1 1 1

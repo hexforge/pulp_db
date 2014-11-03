@@ -1,0 +1,11 @@
+Can reorder the endiian ness of data to get better tries.  Things tend to cluster around 0
+
+
+0001, 0101, 0010, 0011
+
+1101
+0011
+0100
+0000  #<--- more likely to get a long tail of values.
+
+

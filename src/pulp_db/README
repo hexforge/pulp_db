@@ -1,0 +1,30 @@
+pulp_db
+
+NoSQL db for:
+     * jagged  
+     * ordered/realtime
+     * immutable data
+
+Supports indexing.
+Python query api.  Much nicer SQL imo.    ( DB[:200](fld=selector_func) & DB.idx['time'](time_range_func)(un_indexed) ) | DB(some_selector)(some_thing)[::2](some_othering)
+    
+    SELECT * FROM TableTimes INNER JOIN TableTypes ON TableTimes.id = TableTypes.id
+    vs
+    DB.idx['time'] & DB.idx['type']
+    
+    SELECT * FROM TableA FULL OUTER JOIN TableB ON TableA.name = TableB.name
+    vs
+    DB.idx['time'] | DB.idx['type']
+
+ Far more expressive and general.   Can just chain.  
+    DB(selector)(selector)[::2](selector)(selector)(selector)[:1000]
+ Can combine
+    ( DB[:200](fld=selector_func) & DB.idx['time'](time_range_func)(un_indexed) ) | DB(some_selector)(some_thing)[::2](some_othering)
+    
+
+
+Targeting:
+    High write throughput:   Two stage process to acchive this.  1) Capture and do little.  2) Offline optimise [lots more todo here].
+    Super fast read queries.  [More todo here, pushing more to c]
+        Low memory use for read mode.  Streaming results.
+

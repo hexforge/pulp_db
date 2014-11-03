@@ -1,0 +1,21 @@
+http://stevehanov.ca/blog/index.php?id=120
+
+Note 11111110 
+Is not efficent for large domains of many children.  Such distrubutions live big and then die fast.
+
+This encoding expects 0 common and most impoatrnt thing to encode.  In a section. No values such as 11010101 are possible,
+
+It very clever you look at your younger brother and see through his ones where you can find your first child.
+
+
+
+http://ejohn.org/blog/revised-javascript-dictionary-search/
+
+
+
+A trie feels like it the work of man.  A hash is a god structure, it looks into the divitiny of data to know it's true place.
+Even old.
+
+
+My giess is that a marrisa trie is based of this implementation
+

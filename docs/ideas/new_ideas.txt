@@ -1,0 +1,10 @@
+trie for keys with meta data storing max len.
+merge tries.  regularlar encoded blah so can jump.
+
+
+In a block.  Have meta data such as number in blah, low high. arthmetic encoding.
+
+Instead of arthemetic encoding how about:
+What about bit storage
+011101 means not first or 4th
+When is this more effiencent.

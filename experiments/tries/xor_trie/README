@@ -1,0 +1,23 @@
+ much smaller domain.  Don't need as many huge numbers.  Most are smaller pertibations.
+
+Xor trie
+
+11011
+11101
+10001
+
+How can we store these?
+
+Eaqch level we apply them.  Don't need the full binary range?
+
+Each level looks like : [256byte, xor_data]
+
+Instead of 4bytes each to represent each int, we only need a few. It is very similar to just sorting and storing the diffs
+
+
+
+[xor_root]
+   |     \
+[data] [data]
+   |
+[data]

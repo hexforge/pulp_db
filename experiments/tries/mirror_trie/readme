@@ -1,0 +1,30 @@
+The idea behind a mirror trie is a python dict like object where the key and value are one equal footing.
+
+We need a trie that can is bidirectional like xor linked lists.
+
+Normal trie.  But instaed of values at the nodes.  We have a join to another trie. that works on the value.
+
+
+mirror.keys()
+mirror.values()
+x in mirror.keys()
+y in mirror.values()
+x.values[] = key
+x.keys[] = value
+
+
+x.keys.search(lambda x: x.startswith)
+x.ketys.search(lambda x: x.endswith)
+x.values.search(lambda x: x.startswith)
+x.values.search(lambda x: x.endswith)
+
+x[:]
+
+x.keys[:]
+x.values[:]
+
+
+In order
+
+
+

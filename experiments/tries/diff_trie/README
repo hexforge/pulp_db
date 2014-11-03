@@ -1,0 +1,13 @@
+fference trie
+Instead of charaters lets look at data inside.
+1000 1500 1200
+
+Could be stored like
+1000
+0 200 500 
+
+Could be stored like
+1000
+0 200
+    300
+

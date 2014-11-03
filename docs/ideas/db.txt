@@ -1,0 +1,335 @@
+Problem statement
+-----------------
+We have huge playbacks or ordered data.
+Need to be able to filter fast to generate smaller more rational playbacks.
+Lots of repetition of data elements.  Playbacks are traditionally compressed with gzip.
+Irrational meta header in current format.
+
+Thoughts
+--------
+Traditional db anaylsis.  Basic flat file faster smaller?
+To much data to index everything?
+
+Use original data playback saves duplicating everything?
+    Gzip random access fast enough?
+
+Is gzip the best compression lib for this?
+
+Relational db, generic tricky?
+No SQL.  Interesting?
+Flat file faster?
+pcap file format.ss
+
+Databases of note
+-----------------
+other databases of note
+mongo
+http://docs.basho.com/riak
+https://en.wikipedia.org/wiki/LevelDB
+https://en.wikipedia.org/wiki/InfinityDB
+
+
+Flat file
+---------
+I am going to explore this area:
+
+Pulp: Ideas.  (immutable_db.  Never edits.  Stores only what it got. Write once. Read many.)
+
+A static database that is only optimised for retrieval.  Data once stored is immutable.
+If a db doesn't have to worry about insertion resizing what can we do.
+Initially create once query many.
+Super simple mostly except when a reason not (encoding of index)
+Sliceable. Many machines.  It is a big data problem. Distrubuted?
+
+Indexing
+--------
+
+We index both msg_ind -> msg
+            key: val  -> [msg_ind1, msg_ind2]
+
+We use indexing many times.
+Once as the message index.
+But many times as the key index. 
+
+Slightly different problems.  msg_ind -> msg. This can be a fixed length table super fast lookup.
+
+Fixed msg_ind length index.  
+    Need to store msg_location.
+    Need to store msg_size. 
+    We can combine these requirements into one to save space.
+
+    The key is to have predicable indexable index.
+    Can have it predicatble with a formula.
+
+    Size is much smaller to store.
+
+    Could do something like this:
+
+        offset #<--- How big should this be?
+        size   #<--- How big should this be?
+        size
+        size
+        offset
+
+        Notes
+        5bytes = terrabyte addressable. (offsets)
+        3bytes = 16mb addressable. (sizes)
+        3bytes not possible in struct do to alignment.
+        3 bytes is good as up to 16mb. 4bytes up to 4gb.  2bytes only 65kb.
+
+Variable key index.
+    Lots of big index fields.  Storing something like the difference is more space efficient.
+
+    If we use arithmetic encoding then it a bit tricky to gallop.
+    Data[2344565:2344565]&Data(foo=bar)
+
+        # Can use the same trick. 
+        # Differences then offset. Differences then offset.  Difference here is it is variable number of elements between each offset.
+        # At the boundaries need to store number of messages, high low.
+        # Boundaries at fixed points.
+
+
+An uncompressed playback is around 10000 messages per mb.
+Basing stuff of 50gb uncompressed playback.
+500000000 half a billion messages.
+
+32bit ~ 4billion numbers.
+8bytes might be enough.
+8bytes * 0.5billion = 4gb.
+
+Now this is way way too expensive. 
+http://preshing.com/20121026/1mb-sorting-explained/
+http://preshing.com/20121105/arithmetic-coding-and-the-1mb-sorting-problem/
+http://preshing.com/20121105/arithmetic-encoding-using-fixed-point-math/
+http://stackoverflow.com/questions/12748246/sorting-1-million-8-digit-numbers-in-1mb-of-ram
+http://en.wikipedia.org/wiki/Arithmetic_coding
+
+Average delta is the key.  Approx 2**(n) == average delta.  n=bits.  Things like msgtype, source ip,  should be very small approx 1byte not 8.  Thing with millions of possibilities are a bigger problem.  (Multivalue buckets could be used)
+
+Upper limit around 4gb per field indexed.  For fields like msgtype and source ip around 500mb per index.
+
+
+Python interface to flat file static DB
+---------------------------------------
+
+x = pulp('db_name', 'w')
+x.append(data, {key1: val1, key2: val2})   # Index is optional.
+Db.close  #<--- Maybe split this up as it may take a while to merge ec.
+
+
+playback = pulp('db_name', 'r')
+with playback.create() as x:
+    x.append(data, {index_me})
+
+Something like eyeball.   Everything is lazy streaming and ordered.
+
+playback[1]     # First message
+playback[2:24]  # Messages from 2 to 24
+
+playback(field=2)            # Value query
+playback(foo=lambda x: x==2) # Callable query
+vs
+playback.field['value']
+playback.field.select(func)
+
+10 > y.erm > 23 
+y.erm.keys()
+
+
+Should never  need to worry about Order of expression auto optimise gallops symmetrically.
+Say results are [1,2,3,5,......] vs [99999999].  Just need to merge galop through the longer.  Data is sorted can therefor do a bit of jump predictability :)
+
+Example queries:
+    Data(common=2)&Data(rare=3) vs Data(rare=3)&Data(common=2)&
+    Data[:100]&Data(foo=bar)
+
+Problems:
+
+    It a question of Item vs [Item]
+        Consider this query
+            Data[1]&Data(foo=bar)
+            Data[1]
+    
+        This should return the same thing. 
+        NullItems
+    
+        Would this fix it? Data[1:1] &Data(foo=bar)
+
+If we can't index everything. 
+If the data must be stored in raw format (no self explaining json)
+Then we have duplication between the index and the raw,
+    To if something is indexed must provide a way not use index.
+        Data[:100]&Data(foo=bar, _eval=True)
+
+How to know what is indexed
+
+Len(playback)
+playback.indexed # Returns indexed fields
+playback.fields       # All known fields ever seen
+
+
+Concurrency
+-----------
+
+Being able to write to an index and flush it as we go.
+
+I like this structure.  I think it useful to be able to flush on a different thread at same time as write. 
+Is looking up a pointer atomic? Saving too?
+If pointer is set then we have finished with a block and it can be flushed at any time.
+
+Root->[trie,pointer]->[trie,pointer]->[trie,pointer]
+Root->[ipage,next_index]->[ipage,next_index]->[ipage,next_index]->[ipage,next_index]
+
+Possible need for:
+Root.
+Current block.
+
+Offsets
+-------
+
+We need to be able to calculate the the memory location of a msg.  Must be able to find block offset fast. 
+# formula indexing division is expensive.  As long as power of two it easy todo with bitshift.
+
+# Variable length. Example
+# Consider x*4. This will yeild an index that is only correct for some allnments.
+# We must average 4bytes per each. So lets go with 82222.
+#
+# offset
+# size
+# size
+# size
+# size
+# offset
+# size
+# size
+# size
+# size
+# ...
+#
+# Then (x&(~011))*4  gives the offset location. (x&(011)) gives the index of the calculated position.
+# When we multiply by 4 that is the same as a shift
+# Now this is not anywhere near space efficient enough.
+
+Other examples:
+
+###############################
+# 5 bytes is a terrabyte. 
+# What can be done with 3bytes? = 16mb.
+# What about 20bits = 1mb
+# 256k max messages size.
+
+x&(~glag_bits_needed_to_express_num_per_packet) * average_density.
+
+################################
+256 = ((40 + (18*n))
+Less than 3 bytes. n = 12
+
+#################################
+256 = 8bytes + (8*3bytes)
+4 bytes average.
+Could do above with 516, 16=n. And have a whole byte free.
+
+# This must be a shortcut value. 2,4,8,16,32
+
+http://homepage.cs.uiowa.edu/~jones/bcd/mod.shtml#exmod3
+An example: Mod 6, a composite modulus
+
+So lets do more
+
+#############################
+3byte
+384bits
+16*21bit=336bits  #2mb
+64=6bytes for an offset.
+
+#############################
+192bits
+8*19bits          #0.5mb
+5bytes for offset.
+
+#############################
+516bits
+64bits
+14bits*32.
+
+# --max-message-size=16kb, 
+
+#############################
+
+256
+13bits*16 + 48
+#--max message-size=8kb
+
+############################
+1024bits                         #<-------------- Favorite2
+15bits*64+64
+# --max-message-size=32kb
+
+2048 per page.
+
+#############################
+
+Composite modulus.  see http://homepage.cs.uiowa.edu/~jones/bcd/mod.shtml#exmod6
+
+1024bits                         #<-------------- Favorite1
+20bits*(16*3)+64
+= --max-message-size=1mb
+
+#48*4*8=1536 keys per page. 512*3
+#32 blocks per page
+
+2 2/3 bytes per each
+0.6gb extra per billion messages
+
+############################
+
+Could have dynamic delta storage. Say store 4bytes every hundred.  Could be smallest of all.
+
+# Then would get average message size.
+delta_offset
+delta_offset
+delta_offset
+delta_offset
+
+Can reuse the 
+
+#############################
+
+
+4096 bytes in a page.  We fit in 1280 of these into this.
+
+46
+160pages
+8 per page.
+
+
+# x = 28739837283289732
+# Determine the page.
+# Determine position in the page.
+
+number_per_page must be 2*n or 2*n-1.  2,4,8,16,32,64,128,256,512,1024,2048.
+blocks_per_page must be 2*n or 2*n-1.
+
+
+Thus we must have average of 2bytes. So we screwed.  Store as much as possible in the same block.
+
+# Can store theidfference in sizes instead of sizes. But this would give us nothing as fixed length. Usless a undocumented feature to sometimes support bigger file sizes.
+
+# All we need todo is prouce a structure that is preidctable.
+
+
+Note:
+Ideally we want the index beside the data as much as possible.  1,2,3,4,5,6,7,8,9,10
+
+[idex|   ] 
+[]
+[idex|   ] 
+[idex|   ] 
+[]
+[]
+[]
+[]
+[idex|   ]
+[]
+[]
+[idex|   ]

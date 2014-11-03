@@ -1,0 +1,41 @@
+
+
+###################################################
+
+http://stackoverflow.com/questions/3002122/fastest-file-reading-in-c  This outlines some of the main synchronous methods of file reading
+http://stackoverflow.com/questions/2394479/fastest-way-to-read-every-30th-byte-of-large-binary-file This was the interesting re fseek  
+
+http://stackoverflow.com/questions/1201261/what-is-the-fastest-method-for-high-performance-sequential-file-i-o-in-c
+http://stackoverflow.com/questions/13433008/fastest-way-to-read-files-in-c
+http://stackoverflow.com/questions/3002122/fastest-file-reading-in-c
+http://stackoverflow.com/questions/2394479/fastest-way-to-read-every-30th-byte-of-large-binary-file
+http://stackoverflow.com/questions/1658476/c-fopen-vs-open
+http://stackoverflow.com/questions/3605848/open-and-fopen-function?lq=1
+http://stackoverflow.com/questions/8123094/very-fast-text-file-processing-c?lq=1
+
+http://stackoverflow.com/questions/2474707/passing-char-into-fopen-with-c?rq=1    #<----
+
+
+###################################################
+
+http://en.wikipedia.org/wiki/Splice_%28system_call%29  This is interesting.  But after investigation it looks like Wikipedia is wrong.  “vmsplice() can map an application data area into a pipe (or vice versa)” The vice versa bit seems to be a lie. 
+http://stackoverflow.com/questions/15914382/is-there-a-reverse-operation-for-the-vmsplice-system-call-in-linux
+http://en.wikipedia.org/wiki/Mmap
+
+####################################################
+
+Paging considerations::
+Page the playback
+Page the index
+A page is 4096 bytes.
+
+
+Would be nice never to have to move data. Say we page.
+Would be great to be just have message sections just be pointers in that page.  
+But how to handle data on boundary.  
+Also when we del a page, then the stuff indexed will still need to exists. 
+This then becomes referenence counting.
+
+
+
+
