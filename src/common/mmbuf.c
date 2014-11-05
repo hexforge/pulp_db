@@ -1,14 +1,11 @@
-
-
 #include "mmbuf.h"
-
 
 #include <stdio.h>      //perror, fprintf, printf
 #include <sys/types.h>  //off_t
 #include <sys/stat.h>   //O_RDONLY
 #include <fcntl.h>      //close, write, open, O_RDWR, O_TRUNC, O_CREAT
 #include <unistd.h>     //ftruncate, lseek, SEEK_CUR, SEEK_END, SEEK_SET
-#include <errno.h>
+#include <errno.h>      //errno
 #include <stdlib.h>     //exit, EXIT_FAILURE
 #include <stddef.h>     //ptrdiff_t
 #include <string.h>     //memcpy
@@ -221,7 +218,6 @@ void *mmbuf__pos_tmpptr(struct mmbuf__obj *m, const off_t position)
 {
     return (void *) ((char *)(m->map)+position);
 }
-
 
 void *mmbuf__alloc(struct mmbuf__obj *m, const unsigned int length)
 {
