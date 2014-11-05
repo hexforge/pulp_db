@@ -8,6 +8,6 @@ cd mds
 ./clean.sh
 cd ..
 
-cd common
+cd ../common
 ./clean.sh
-cd ..
+cd ../pulp_db

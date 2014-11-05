@@ -56,7 +56,7 @@ struct keyds
     
     // WRITE: Stage two.
     // READ: 
-    struct mmbuf_obj *meta_file;
+    struct mmbuf__obj *meta_file;
     struct ttrie__obj ttrie;
     struct cpref__obj cref;
 };

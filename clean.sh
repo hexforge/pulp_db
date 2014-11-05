@@ -10,10 +10,12 @@ cd mds
 ./clean.sh
 cd ..
 
+cd ..
+
 cd common
 ./clean.sh
 cd ..
-cd ..
+
 
 cd pb_tools
 ./clean.sh

@@ -54,7 +54,7 @@ static const int DPREF_NEXT_PAGE_INDEX = (DPREF_SIZE_OF_ARRAY-1);
 struct dpref__obj 
 {
     char mode;
-    struct mmbuf_obj *ref_file;
+    struct mmbuf__obj *ref_file;
     char ref_file_path[256];
     unsigned long long num_msgs;
 };

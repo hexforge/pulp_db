@@ -84,7 +84,7 @@ int parse_header(char *const data, struct metaparse__msg *const p)
 
 int metaparse__setup(struct metaparse__pb *pb, const char *file_path, const char *mode)
 {
-    struct mmbuf_obj *m = malloc(sizeof(struct mmbuf_obj));
+    struct mmbuf__obj *m = malloc(sizeof(struct mmbuf__obj));
     pb->m = m;
     pb->offset = 0;
     return mmbuf__setup(m, file_path, mode);
@@ -98,9 +98,9 @@ int metaparse__teardown(struct metaparse__pb *pb)
     return rc;
 }
 
-int metaparse__get_msg(struct metaparse__pb *const pb, struct metaparse__msg *const pmsg)
+int metaparse__get_msg(struct metaparse__pb *pb, struct metaparse__msg *pmsg)
 {
-    struct mmbuf_obj *m = pb->m;
+    struct mmbuf__obj *m = pb->m;
     int amount_got = 0;
 
     //DEBUG<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<

@@ -4,6 +4,6 @@ cd ..
 cd mds
 ./build.sh
 cd ..
-cd common
+cd ../common
 ./build.sh
-cd ..
+cd ../pulp_db

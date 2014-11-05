@@ -9,7 +9,7 @@ DPREF_STRUCT = """
 struct dpref__obj 
 {
     char mode;
-    struct mmbuf_obj *ref_file;
+    struct mmbuf__obj *ref_file;
     char ref_file_path[256];
     unsigned long long num_msgs;
 };

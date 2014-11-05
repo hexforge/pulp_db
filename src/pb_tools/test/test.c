@@ -43,8 +43,8 @@ struct arg_struct handle_args(int argc, char *argv[])
     return arg_data;
 }
 
-static int test(struct metaparse__pb *m, struct mmbuf_obj *out_obj);
-int test(struct metaparse__pb *m, struct mmbuf_obj *out_obj)
+static int test(struct metaparse__pb *m, struct mmbuf__obj *out_obj);
+int test(struct metaparse__pb *m, struct mmbuf__obj *out_obj)
 {
     int count = 0;
     int rc;
@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
     arg_data = handle_args(argc, argv);
 
     struct metaparse__pb pbf_obj;
-    struct mmbuf_obj out_obj;
+    struct mmbuf__obj out_obj;
     
     if (metaparse__setup(&pbf_obj, arg_data.pb_path, "r")!=0)
         exit_with_error("Fail to setup playback\n");

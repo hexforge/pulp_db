@@ -3,7 +3,7 @@
 
 struct metaparse__pb
 {
-    struct mmbuf_obj *m;
+    struct mmbuf__obj *m;
     char *data;
     long long offset;
 };
@@ -20,6 +20,6 @@ struct metaparse__msg
 
 int metaparse__setup(struct metaparse__pb *m, const char *file_path, const char *mode);
 int metaparse__teardown(struct metaparse__pb *m);
-int metaparse__get_msg(struct metaparse__pb *const m, struct metaparse__msg *const pmsg);
+int metaparse__get_msg(struct metaparse__pb *m, struct metaparse__msg *pmsg);
 
 #endif //metaparseH

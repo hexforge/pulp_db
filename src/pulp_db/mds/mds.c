@@ -88,10 +88,10 @@ int mds__setup(struct mds_obj *m, char *dirpath, char mode)
     }
     m->mode = mode;
 
-    m->data_file = malloc(sizeof(struct mmbuf_obj));
+    m->data_file = malloc(sizeof(struct mmbuf__obj));
     mmbuf__setup(m->data_file, ds_path, mode_with_hint);
 
-    m->index_file = malloc(sizeof(struct mmbuf_obj));
+    m->index_file = malloc(sizeof(struct mmbuf__obj));
     mmbuf__setup(m->index_file, index_path, mode_with_hint);
     return 0;
 }

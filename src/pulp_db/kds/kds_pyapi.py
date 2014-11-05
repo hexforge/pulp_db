@@ -87,7 +87,7 @@ ffi.cdef(KDS_API_CDEF)
 folder_path = os.path.dirname(__file__)
 if not folder_path:
     folder_path = os.getcwd()
-common_path = os.path.abspath(os.path.join(folder_path, "../common"))
+common_path = os.path.abspath(os.path.join(folder_path, "../../common"))
 KDS_SO = ffi.verify("""#include "kds.h" """, 
                       libraries=["kds"], 
                       library_dirs=[folder_path],

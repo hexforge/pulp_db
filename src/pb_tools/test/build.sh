@@ -1,6 +1,6 @@
 cd ..
-gcc  -c -g -Wall -Werror *\.c
+./build.sh
 cp *o test
 cd test
-gcc -c *\.c -I../
+gcc -c *\.c -I../ -I../../common
 gcc -g *\.o

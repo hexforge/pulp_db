@@ -9,47 +9,39 @@
 static signed long long new_page(struct dpref__obj *const p);
 static signed long long new_page(struct dpref__obj *const p)
 {
-    return mmbuf__offalloc(p->ref_file, DPREF_PAGE_SIZE);
+    return mmbuf__pos_alloc(p->ref_file, DPREF_PAGE_SIZE);
 }
 
-static int flush_buffer(struct dpref__obj *p, struct dpref__buffer *buf);
-static int flush_buffer(struct dpref__obj *p, struct dpref__buffer *buf)
+static int flush_buffer(struct dpref__obj *p, struct dpref__buffer *buf, const bool final);
+static int flush_buffer(struct dpref__obj *p, struct dpref__buffer *buf, const bool final)
 {
     if (buf->refs_index < 0)
         return 1;
     
-    signed long long *refs_page_array = (signed long long *) ((unsigned char *) p->ref_file->map + buf->current_page_offset);
+    signed long long *refs_page_array = (signed long long *) mmbuf__pos_tmpptr(p->ref_file, buf->current_page_offset);
 
-    if (buf->refs_index< (int)DPREF_NUM_REF_PER_PAGE)
+    if (buf->refs_index < (int)DPREF_NUM_REF_PER_PAGE)
     {
         for (unsigned long i=buf->refs_index; i<(int)DPREF_NUM_REF_PER_PAGE; ++i)
             refs_page_array[i] = -1;
     }
     
-    signed long long new_offset = new_page(p);
-    refs_page_array[DPREF_NEXT_PAGE_INDEX] = new_offset;
-    buf->current_page_offset = new_offset;
-    buf->refs_index = 0;
-    return 0;
-}
-
-static int final_flush_buffer(struct dpref__obj *p, struct dpref__buffer *buf);
-static int final_flush_buffer(struct dpref__obj *p, struct dpref__buffer *buf)
-{
-    if (buf->refs_index < 0)
-        return 1;
-
-    signed long long *refs_page_array = (signed long long *) ((unsigned char *) p->ref_file->map + buf->current_page_offset);
-    if (buf->refs_index<(int)DPREF_NUM_REF_PER_PAGE)
+    if (final==true)
     {
-        for (unsigned long i=buf->refs_index; i<(int)DPREF_NUM_REF_PER_PAGE; ++i)
-        {
-            refs_page_array[i] = -1;
-        }
+        refs_page_array[DPREF_NEXT_PAGE_INDEX] = -1;
+        buf->refs_index = -1;
     }
+    else
+    {
+        signed long long new_offset = new_page(p);
 
-    refs_page_array[DPREF_NEXT_PAGE_INDEX] = -1;
-    buf->refs_index = -1;
+        // Need to recalulate this as new page might have invalidated the pointer.
+        refs_page_array = (signed long long *) mmbuf__pos_tmpptr(p->ref_file, buf->current_page_offset);
+        refs_page_array[DPREF_NEXT_PAGE_INDEX] = new_offset;
+        
+        buf->current_page_offset = new_offset;
+        buf->refs_index = 0;
+    }
     return 0;
 }
 
@@ -118,7 +110,7 @@ static int dpref__setup_wbuffer(struct dpref__obj *const p, struct dpref__buffer
 int dpref__open(struct dpref__obj *const p, const char *ref_file_path, const char mode)
 {
     p->mode = mode;
-    p->ref_file = malloc(sizeof(struct mmbuf_obj));
+    p->ref_file = malloc(sizeof(struct mmbuf__obj));
     p->num_msgs = 0;
     strcpy(p->ref_file_path, ref_file_path);    
 
@@ -183,7 +175,7 @@ int dpref__teardown_buffer(struct dpref__obj *const p, struct dpref__buffer *con
     {
         if (buf->refs_index > 0)
         {
-            final_flush_buffer(p, buf);
+            flush_buffer(p, buf, true);
         }
     }
     buf->state = DPREF_BUFFER_CLOSED;
@@ -206,7 +198,7 @@ signed long long dpref__append(struct dpref__obj *const p, struct dpref__buffer 
 
     if (buf->refs_index >= (int)DPREF_NUM_REF_PER_PAGE)
     {
-        flush_buffer(p, buf);
+        flush_buffer(p, buf, false);
     }
     return 0;
 }

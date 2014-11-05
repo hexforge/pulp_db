@@ -1,0 +1,2 @@
+mmbuf
+Memory mapped interface.  Makes it easy to append data into a file.  Automatically grows the file.

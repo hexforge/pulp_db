@@ -343,7 +343,7 @@ static void meta_block_append(struct cpref__stream *stream, signed long long low
 int cpref__open(struct cpref__obj *cp, const char *ref_file_path, const char mode)
 {
     cp->mode = mode;
-    cp->ref_file = malloc(sizeof(struct mmbuf_obj));
+    cp->ref_file = malloc(sizeof(struct mmbuf__obj));
 
     cp->size = 0;
     strcpy(cp->ref_file_path, ref_file_path);    

@@ -205,7 +205,7 @@ int kds__open(struct keyds *kds, char *folder_path, char *fieldname, char mode)
     kds->buffers = NULL;  //pointer to array of buffers.
     kds->last_i = 0;
 
-    kds->meta_file = malloc(sizeof(struct mmbuf_obj));
+    kds->meta_file = malloc(sizeof(struct mmbuf__obj));
     if (kds->mode=='w')
     {
         kds->state = STATE_RAW;

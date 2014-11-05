@@ -193,8 +193,8 @@ void ttrie__print_root(struct ttrie__obj *tt)
 
 
 // THESE FUNCTION BELOW ARE PRIME FOR REFACTOR USED ELSE WHERE AS WELL.
-unsigned long long serialise_global_data(struct ttrie__obj *tt, struct mmbuf_obj *m, unsigned long long offset);
-unsigned long long serialise_global_data(struct ttrie__obj *tt, struct mmbuf_obj *m, unsigned long long offset)
+unsigned long long serialise_global_data(struct ttrie__obj *tt, struct mmbuf__obj *m, unsigned long long offset);
+unsigned long long serialise_global_data(struct ttrie__obj *tt, struct mmbuf__obj *m, unsigned long long offset)
 {
     mmbuf__append(m, &(tt->len), sizeof(tt->len));
     offset += sizeof(tt->len);
@@ -203,8 +203,8 @@ unsigned long long serialise_global_data(struct ttrie__obj *tt, struct mmbuf_obj
     return offset;
 }
 
-unsigned long long deserialise_global_data(struct ttrie__obj *tt, struct mmbuf_obj *m, unsigned long long offset);
-unsigned long long deserialise_global_data(struct ttrie__obj *tt, struct mmbuf_obj *m, unsigned long long offset)
+unsigned long long deserialise_global_data(struct ttrie__obj *tt, struct mmbuf__obj *m, unsigned long long offset);
+unsigned long long deserialise_global_data(struct ttrie__obj *tt, struct mmbuf__obj *m, unsigned long long offset)
 {
     unsigned char *read_from = NULL;
     
@@ -534,8 +534,8 @@ static int choice_new_row(struct ttrie__obj *tt, char *table_name, unsigned char
     return 0;
 }
 
-static unsigned long long  choice_tables_serialise(struct ttrie__obj *tt, struct mmbuf_obj *m, unsigned long long offset);
-static unsigned long long  choice_tables_serialise(struct ttrie__obj *tt, struct mmbuf_obj *m, unsigned long long offset)
+static unsigned long long  choice_tables_serialise(struct ttrie__obj *tt, struct mmbuf__obj *m, unsigned long long offset);
+static unsigned long long  choice_tables_serialise(struct ttrie__obj *tt, struct mmbuf__obj *m, unsigned long long offset)
 {
     int null = 0;
     if (tt->choice_tables == NULL)
@@ -572,8 +572,8 @@ static unsigned long long  choice_tables_serialise(struct ttrie__obj *tt, struct
     return offset;
 }
 
-static unsigned long long choice_tables_deserialise(struct ttrie__obj *tt, struct mmbuf_obj *m, unsigned long long offset);
-static unsigned long long choice_tables_deserialise(struct ttrie__obj *tt, struct mmbuf_obj *m, unsigned long long offset)
+static unsigned long long choice_tables_deserialise(struct ttrie__obj *tt, struct mmbuf__obj *m, unsigned long long offset);
+static unsigned long long choice_tables_deserialise(struct ttrie__obj *tt, struct mmbuf__obj *m, unsigned long long offset)
 {
     unsigned char *read_from = NULL;
     int null = 0;
@@ -780,8 +780,8 @@ static int terminator_append(struct ttrie__obj *tt, unsigned long long value, un
     return 0;
 }
 
-static unsigned long long terminator_serialise(struct ttrie__obj *tt, struct mmbuf_obj *m, unsigned long long offset);
-static unsigned long long terminator_serialise(struct ttrie__obj *tt, struct mmbuf_obj *m, unsigned long long offset)
+static unsigned long long terminator_serialise(struct ttrie__obj *tt, struct mmbuf__obj *m, unsigned long long offset);
+static unsigned long long terminator_serialise(struct ttrie__obj *tt, struct mmbuf__obj *m, unsigned long long offset)
 {
     int null = 0;
     if (tt->term_table.results == NULL)
@@ -800,8 +800,8 @@ static unsigned long long terminator_serialise(struct ttrie__obj *tt, struct mmb
     return offset;
 }
 
-static unsigned long long terminator_deserialise(struct ttrie__obj *tt, struct mmbuf_obj *m, unsigned long long offset);
-static unsigned long long terminator_deserialise(struct ttrie__obj *tt, struct mmbuf_obj *m, unsigned long long offset)
+static unsigned long long terminator_deserialise(struct ttrie__obj *tt, struct mmbuf__obj *m, unsigned long long offset);
+static unsigned long long terminator_deserialise(struct ttrie__obj *tt, struct mmbuf__obj *m, unsigned long long offset)
 {
     unsigned char *read_from = NULL;
     int null = 0;
@@ -905,8 +905,8 @@ static int passthrough_append(struct ttrie__obj *tt, unsigned char child_id[5], 
     return 0;
 }
 
-static unsigned long long passthrough_serialise(struct ttrie__obj *tt, struct mmbuf_obj *m, unsigned long long offset);
-static unsigned long long passthrough_serialise(struct ttrie__obj *tt, struct mmbuf_obj *m, unsigned long long offset)
+static unsigned long long passthrough_serialise(struct ttrie__obj *tt, struct mmbuf__obj *m, unsigned long long offset);
+static unsigned long long passthrough_serialise(struct ttrie__obj *tt, struct mmbuf__obj *m, unsigned long long offset)
 {
     int null = 0;
     if (tt->pass_table.ids == NULL)
@@ -929,8 +929,8 @@ static unsigned long long passthrough_serialise(struct ttrie__obj *tt, struct mm
     return offset;
 }
 
-static unsigned long long passthrough_deserialise(struct ttrie__obj *tt, struct mmbuf_obj *m, unsigned long long offset);
-static unsigned long long passthrough_deserialise(struct ttrie__obj *tt, struct mmbuf_obj *m, unsigned long long offset)
+static unsigned long long passthrough_deserialise(struct ttrie__obj *tt, struct mmbuf__obj *m, unsigned long long offset);
+static unsigned long long passthrough_deserialise(struct ttrie__obj *tt, struct mmbuf__obj *m, unsigned long long offset)
 {
     unsigned char *read_from = NULL;
     int null = 0;
@@ -1061,8 +1061,8 @@ static int suffix_append(struct ttrie__obj *tt, unsigned char *suffix, unsigned 
     return 0;
 }
 
-static unsigned long long suffix_serialise(struct ttrie__obj *tt, struct mmbuf_obj *m, unsigned long long offset);
-static unsigned long long suffix_serialise(struct ttrie__obj *tt, struct mmbuf_obj *m, unsigned long long offset)
+static unsigned long long suffix_serialise(struct ttrie__obj *tt, struct mmbuf__obj *m, unsigned long long offset);
+static unsigned long long suffix_serialise(struct ttrie__obj *tt, struct mmbuf__obj *m, unsigned long long offset)
 {
     int null = 0;
     if (tt->suffix_table.results == NULL)
@@ -1095,8 +1095,8 @@ static unsigned long long suffix_serialise(struct ttrie__obj *tt, struct mmbuf_o
     return offset;
 }
 
-static unsigned long long suffix_deserialise(struct ttrie__obj *tt, struct mmbuf_obj *m, unsigned long long offset);
-static unsigned long long suffix_deserialise(struct ttrie__obj *tt, struct mmbuf_obj *m, unsigned long long offset)
+static unsigned long long suffix_deserialise(struct ttrie__obj *tt, struct mmbuf__obj *m, unsigned long long offset);
+static unsigned long long suffix_deserialise(struct ttrie__obj *tt, struct mmbuf__obj *m, unsigned long long offset)
 {
     unsigned char *read_from = NULL;
     int null = 0;
@@ -1254,8 +1254,8 @@ static int infix_append(struct ttrie__obj *tt, unsigned char *infix, int n, unsi
     return 0;
 } 
 
-static unsigned long long  infix_serialise(struct ttrie__obj *tt, struct mmbuf_obj *m, unsigned long long offset);
-static unsigned long long  infix_serialise(struct ttrie__obj *tt, struct mmbuf_obj *m, unsigned long long offset)
+static unsigned long long  infix_serialise(struct ttrie__obj *tt, struct mmbuf__obj *m, unsigned long long offset);
+static unsigned long long  infix_serialise(struct ttrie__obj *tt, struct mmbuf__obj *m, unsigned long long offset)
 {
     int null = 0;
     if (tt->infix_table.ids == NULL)
@@ -1286,8 +1286,8 @@ static unsigned long long  infix_serialise(struct ttrie__obj *tt, struct mmbuf_o
     return offset;
 }
 
-static unsigned long long  infix_deserialise(struct ttrie__obj *tt, struct mmbuf_obj *m, unsigned long long offset);
-static unsigned long long  infix_deserialise(struct ttrie__obj *tt, struct mmbuf_obj *m, unsigned long long offset)
+static unsigned long long  infix_deserialise(struct ttrie__obj *tt, struct mmbuf__obj *m, unsigned long long offset);
+static unsigned long long  infix_deserialise(struct ttrie__obj *tt, struct mmbuf__obj *m, unsigned long long offset)
 {
     unsigned char *read_from = NULL;
     int null = 0;
@@ -1979,7 +1979,7 @@ int ttrie__convert(struct ttrie__obj *tt, struct rtrie__view *rt)
 
 int ttrie__write(struct ttrie__obj *tt, char *trie_file_name)
 {
-    struct mmbuf_obj m;
+    struct mmbuf__obj m;
     mmbuf__setup(&m, trie_file_name, "ws");
     unsigned long long offset = 0;
 
@@ -1999,7 +1999,7 @@ int ttrie__read(struct ttrie__obj *tt, char *trie_file_name)
 {
 
     //printf("ttrie__read %s\n", trie_file_name);
-    struct mmbuf_obj m;
+    struct mmbuf__obj m;
     mmbuf__setup(&m, trie_file_name, "rs");
     unsigned long long offset = 0;
 

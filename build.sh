@@ -11,7 +11,7 @@ mkdir build/libs
 # Copy headers
 cp src/pulp_db/kds/*.h build/headers
 cp src/pulp_db/mds/*.h build/headers
-cp src/pulp_db/common/*.h build/headers
+cp src/common/*.h build/headers
 cp src/pb_tools/*.h build/headers
 
 
@@ -25,15 +25,16 @@ cd mds
 ./build.sh
 cd ..
 
-cd common
-./build.sh
 cd ..
 
+cd common
+./build.sh
 cd ..
 
 cd pb_tools
 ./build.sh
 cd ..
+
 cd ..
 
 cp src/pulp_db/kds/*.so build/libs

@@ -1,7 +1,4 @@
 
-/*
-ToDo: http://man7.org/linux/man-pages/man2/readahead.2.html
-*/
 
 #include "mmbuf.h"
 #include <stdio.h>  
@@ -20,16 +17,16 @@ DATA
 /*---
 FUNCTIONS
 ---*/
-static void handle_mmap_fail(struct mmbuf_obj *m);
-void handle_mmap_fail(struct mmbuf_obj *m)
+static void handle_mmap_fail(const struct mmbuf__obj *m);
+static void handle_mmap_fail(const struct mmbuf__obj *m)
 {
     close(m->fd);
     perror("Error mmapping the file");
     exit(EXIT_FAILURE);
 }
 
-static void handle_madvise_error(struct mmbuf_obj *m);
-void handle_madvise_error(struct mmbuf_obj *m)
+static void handle_madvise_error(const struct mmbuf__obj *m);
+static void handle_madvise_error(const struct mmbuf__obj *m)
 {
     //printf("I am he22re\n");
     close(m->fd);
@@ -40,8 +37,8 @@ void handle_madvise_error(struct mmbuf_obj *m)
     //printf("I am he4re\n");
 }
 
-static int grow_file(struct mmbuf_obj *const m, const long long amount);
-static int grow_file(struct mmbuf_obj *const m, const long long amount)
+static int grow_file(struct mmbuf__obj *m, const long long amount);
+static int grow_file(struct mmbuf__obj *m, const long long amount)
 {
     long long old_file_size = m->filesize;
 
@@ -73,7 +70,7 @@ static int grow_file(struct mmbuf_obj *const m, const long long amount)
     return 0;
 }
 
-int mmbuf__setup(struct mmbuf_obj *m, const char *file_path, const char *mode)
+int mmbuf__setup(struct mmbuf__obj *m, const char *file_path, const char *mode)
 {
     //printf("opening the file %s\n", file_path);
     // OPEN THE FILE
@@ -137,7 +134,7 @@ int mmbuf__setup(struct mmbuf_obj *m, const char *file_path, const char *mode)
     return 0;
 }
 
-int mmbuf__teardown(const struct mmbuf_obj *m)
+int mmbuf__teardown(const struct mmbuf__obj *m)
 {
     if (m->mode=='w')
     {
@@ -155,7 +152,7 @@ int mmbuf__teardown(const struct mmbuf_obj *m)
     return 0;
 }
 
-int mmbuf__get_data(const struct mmbuf_obj *m, void **result_p, const long long offset, const int length)  // This should be a void pointer
+int mmbuf__get_data(const struct mmbuf__obj *m, void **result_p, const long long offset, const int length)  // This should be a void pointer
 {
     if (offset>(m->filesize))
         return 0;
@@ -173,7 +170,7 @@ int mmbuf__get_data(const struct mmbuf_obj *m, void **result_p, const long long 
     return available_data;
 }
 
-int mmbuf__free_data(struct mmbuf_obj *const m, const long long low, const long long high)   // Not using high at the moment, jsut freeing everything upto low.
+int mmbuf__free_data(struct mmbuf__obj *m, const long long low, const long long high)   // Not using high at the moment, jsut freeing everything upto low.
 {
     if (low==0)
     {   
@@ -203,7 +200,7 @@ int mmbuf__free_data(struct mmbuf_obj *const m, const long long low, const long 
     return 0;
 }
 
-int mmbuf__append(struct mmbuf_obj *const m, const void *source, const unsigned int length)
+int mmbuf__append(struct mmbuf__obj *m, const void *source, const unsigned int length)
 {
     //Writing data may change the mapping if max size is hit
     //printf("%p %p %d %d %ld\n", m->map, source, length, m->filesize, m->offset);
@@ -218,7 +215,26 @@ int mmbuf__append(struct mmbuf_obj *const m, const void *source, const unsigned 
     return 0;
 }
 
-void *mmbuf__alloc(struct mmbuf_obj *const m, const unsigned int length)
+signed long long mmbuf__pos_alloc(struct mmbuf__obj *m, const unsigned int length)
+{
+    while ((m->offset + length) > (m->filesize))
+    {
+        printf("old_size='%ld' old_map_pt='%p'\n", m->filesize, m->map);
+        grow_file(m, m->filesize*1.5);
+        printf("new_size='%ld' new_map_pt='%p'\n", m->filesize, m->map);
+    }
+    signed long long offset = m->offset;
+    m->offset += length;
+    return offset;
+}
+
+void *mmbuf__pos_tmpptr(struct mmbuf__obj *m, const signed long long position)
+{
+    return (void *) ((char *)(m->map)+position);
+}
+
+
+void *mmbuf__alloc(struct mmbuf__obj *m, const unsigned int length)
 {
     while ((m->offset + length) > (m->filesize))
     {
@@ -231,15 +247,3 @@ void *mmbuf__alloc(struct mmbuf_obj *const m, const unsigned int length)
     return free_space;
 }
 
-signed long long mmbuf__offalloc(struct mmbuf_obj *const m, const unsigned int length)
-{
-    while ((m->offset + length) > (m->filesize))
-    {
-        printf("old_size='%ld' old_map_pt='%p'\n", m->filesize, m->map);
-        grow_file(m, m->filesize*1.5);
-        printf("new_size='%ld' new_map_pt='%p'\n", m->filesize, m->map);
-    }
-    signed long long offset = m->offset;
-    m->offset += length;
-    return offset;
-}

@@ -12,8 +12,8 @@ struct mds_obj {
     long long current_block_index;
     long long msg_count;
     struct bitpack__clump *index;
-    struct mmbuf_obj *data_file;
-    struct mmbuf_obj *index_file;
+    struct mmbuf__obj *data_file;
+    struct mmbuf__obj *index_file;
 };
 
 int mds__setup(struct mds_obj *m, char *dirpath, char mode);
