@@ -1,3 +1,7 @@
+# build/pulp_db is the python build
+# build/libs build/headers is the c build
+
+
 ./clean.sh
 
 mkdir build
