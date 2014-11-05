@@ -22,8 +22,8 @@ unsigned int mds__get(struct mds_obj *m, long long index, char **result);
 long long mds__len(struct mds_obj *m);
 """
 folder_path = os.path.dirname(__file__)
-so_path = os.path.abspath(os.path.join(folder_path, '../libs'))
-headers_path = os.path.abspath(os.path.join(folder_path, '../headers'))
+so_path = os.path.abspath(os.path.join(folder_path, '../build/libs'))
+headers_path = os.path.abspath(os.path.join(folder_path, '../build/headers'))
 #c_file_path = os.path.abspath(os.path.join(folder_path, '../pulp_db/kds'))
 
 ffi.cdef(MDS_STRUCTS)

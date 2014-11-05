@@ -11,7 +11,7 @@ then
 fi
 
 echo "rtrie Running consistancy tests"
-export LD_LIBRARY_PATH=`pwd`/../../libs
+export LD_LIBRARY_PATH=`pwd`/../../build/libs
 echo "======================================"
 time ./rtrie_consistant.exe -i=gen_data/random.input -m=gen_data/random.missing -e=gen_data/random.expected
 echo "======================================"

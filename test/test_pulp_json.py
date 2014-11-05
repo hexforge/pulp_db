@@ -40,6 +40,7 @@ import struct
 from nose import with_setup
 from nose.tools import raises
 
+import pypath_hack
 import pulp_db
 
 msg_1 = {"name": "batman",

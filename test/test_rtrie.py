@@ -61,8 +61,8 @@ ffi.cdef(RTRIE_STRUCT)
 ffi.cdef(RTRIE_API)
 
 folder_path = os.path.dirname(__file__)
-so_path = os.path.abspath(os.path.join(folder_path, '../libs'))
-c_file_path = os.path.abspath(os.path.join(folder_path, '../pulp_db/kds'))
+so_path = os.path.abspath(os.path.join(folder_path, '../build/libs'))
+c_file_path = os.path.abspath(os.path.join(folder_path, '../src/pulp_db/kds'))
 
 RTRIE_SO = ffi.verify("""#include "rtrie.c"
 

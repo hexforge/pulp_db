@@ -189,9 +189,9 @@ ffi.cdef(TTRIE_STRUCT)
 ffi.cdef(TTRIE_API)
 
 folder_path = os.path.dirname(__file__)
-so_path = os.path.abspath(os.path.join(folder_path, '../libs'))
-headers_path = os.path.abspath(os.path.join(folder_path, '../headers'))
-c_file_path = os.path.abspath(os.path.join(folder_path, '../pulp_db/kds'))
+so_path = os.path.abspath(os.path.join(folder_path, '../build/libs'))
+headers_path = os.path.abspath(os.path.join(folder_path, '../build/headers'))
+c_file_path = os.path.abspath(os.path.join(folder_path, '../src/pulp_db/kds'))
 
 TTRIE_SO = ffi.verify("""#include "ttrie.c"
 const int INTSIZE = sizeof(int);

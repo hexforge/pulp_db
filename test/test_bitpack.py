@@ -26,9 +26,9 @@ int hex__dump(char *data, unsigned int n);
 
 
 folder_path = os.path.dirname(__file__)
-so_path = os.path.abspath(os.path.join(folder_path, '../libs'))
-headers_path = os.path.abspath(os.path.join(folder_path, '../headers'))
-c_file_path = os.path.abspath(os.path.join(folder_path, '../pulp_db/mds'))
+so_path = os.path.abspath(os.path.join(folder_path, '../build/libs'))
+headers_path = os.path.abspath(os.path.join(folder_path, '../build/headers'))
+c_file_path = os.path.abspath(os.path.join(folder_path, '../src/pulp_db/mds'))
 
 ffi.cdef(BITPACK_STRUCTS)
 ffi.cdef(BITPACK_API)

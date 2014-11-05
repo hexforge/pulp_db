@@ -4,6 +4,7 @@ import random
 from nose import with_setup
 from nose.tools import raises
 
+import pypath_hack
 import pulp_db
 from pb_tools import get_decoder, parse_pb
 

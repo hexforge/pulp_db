@@ -3,6 +3,7 @@ import random
 from collections import namedtuple
 from nose.tools import raises
 
+import pypath_hack
 import pulp_db
 from pb_tools import get_decoder, parse_pb
 

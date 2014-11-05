@@ -71,9 +71,9 @@ ffi.cdef(CPREF_API)
 
 
 folder_path = os.path.dirname(__file__)
-so_path = os.path.abspath(os.path.join(folder_path, '../libs'))
-headers_path = os.path.abspath(os.path.join(folder_path, '../headers'))
-c_file_path = os.path.abspath(os.path.join(folder_path, '../pulp_db/kds'))
+so_path = os.path.abspath(os.path.join(folder_path, '../build/libs'))
+headers_path = os.path.abspath(os.path.join(folder_path, '../build/headers'))
+c_file_path = os.path.abspath(os.path.join(folder_path, '../src/pulp_db/kds'))
 
 # How do we unit test static functions. We cheat and include thus not static.
 CPREF_SO = ffi.verify("""#include "cpref.c"
