@@ -25,10 +25,10 @@ cd mds
 ./build.sh
 cd ..
 
-cd ..
-
 cd common
 ./build.sh
+cd ..
+
 cd ..
 
 cd pb_tools
