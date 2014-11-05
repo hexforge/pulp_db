@@ -21,6 +21,6 @@ cd ..
 
 cd ..
 
-find . -name '__pycacache__' | xargs rm -rf 
+find . -name '__pycache__' | xargs rm -rf 
 
 

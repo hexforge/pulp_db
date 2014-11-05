@@ -9,6 +9,17 @@ Look at copy cffi. Then could do much safer stuff.
 
 
 
+Move the array iterators to amore effiecent form,  calculate the array end once, pointer++
+const the code
+
+
+Things todo.
+Migrate tests to commmon folder
+converter: rtrie to ttrie.  Nibble from the bottom not gulp from the top.
+Investigate encoding.
+Thing about dpref. How could we make this more sequential.
+Inconsitant return if true ttrie__get, rtrie__get NULL fail, else found, 1 fail, 0 found.  MAKE THE WORLD CONSISTANT!
+I could really cut down in the api by having void pointers.  That are cast a run time.
 
 
 
