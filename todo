@@ -2,7 +2,7 @@
 2) Fixed length c types.  http://en.wikipedia.org/wiki/C_data_types   _t for any typedef
 3) More memory efficent for say timedata.
 4) Moduler code?
-5) c api pulp_db.h +.c 
+5) c api pulp_db.h +.c http://google-gflags.googlecode.com/svn/trunk/doc/gflags.html
 6) Rewrite complex code.
 
 

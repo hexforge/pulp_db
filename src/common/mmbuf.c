@@ -1,14 +1,19 @@
 
 
 #include "mmbuf.h"
-#include <stdio.h>  
 
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <unistd.h> 
+
+#include <stdio.h>      //perror, fprintf, printf
+#include <sys/types.h>  //off_t
+#include <sys/stat.h>   //O_RDONLY
+#include <fcntl.h>      //close, write, open, O_RDWR, O_TRUNC, O_CREAT
+#include <unistd.h>     //ftruncate, lseek, SEEK_CUR, SEEK_END, SEEK_SET
 #include <errno.h>
-#include <stdlib.h>
-#include <string.h>
+#include <stdlib.h>     //exit, EXIT_FAILURE
+#include <stddef.h>     //ptrdiff_t
+#include <string.h>     //memcpy
+#include <sys/mman.h>   //mmap, mremap, madvise, munmap, 
+                        //MREMAP_MAYMOVE, MAP_FAILED, PROT_READ, MAP_SHARED, PROT_WRITE, MADV_SEQUENTIAL, MADV_RANDOM, MADV_NORMAL
 
 /*---
 DATA
@@ -17,43 +22,28 @@ DATA
 /*---
 FUNCTIONS
 ---*/
-static void handle_mmap_fail(const struct mmbuf__obj *m);
-static void handle_mmap_fail(const struct mmbuf__obj *m)
+static void handle_error(const struct mmbuf__obj *m, const char *err_msg);
+static void handle_error(const struct mmbuf__obj *m, const char *err_msg)
 {
     close(m->fd);
     perror("Error mmapping the file");
     exit(EXIT_FAILURE);
 }
 
-static void handle_madvise_error(const struct mmbuf__obj *m);
-static void handle_madvise_error(const struct mmbuf__obj *m)
+static int grow_file(struct mmbuf__obj *m, const off_t amount);
+static int grow_file(struct mmbuf__obj *m, const off_t amount)
 {
-    //printf("I am he22re\n");
-    close(m->fd);
-    //printf("I am her2e\n");
-    perror("Error madvise the file");
-    //printf("I am her3e\n");
-    exit(EXIT_FAILURE);
-    //printf("I am he4re\n");
-}
-
-static int grow_file(struct mmbuf__obj *m, const long long amount);
-static int grow_file(struct mmbuf__obj *m, const long long amount)
-{
-    long long old_file_size = m->filesize;
-
-    int result = lseek(m->fd, amount-1, SEEK_CUR);
+    off_t result = lseek(m->fd, amount-1, SEEK_CUR);
     if (result == -1) 
     {
-        close(m->fd);
-        perror("Error calling lseek() to 'stretch' the file");
-        exit(EXIT_FAILURE);
+        handle_error(m, "Error calling lseek() to 'stretch' the file");
     }
     
+    off_t old_file_size = m->filesize;
     m->filesize = amount-1;
 
     // Write to end of file to make it take on the size.
-    result = write(m->fd, "", 1);
+    write(m->fd, "", 1);
 
     if (m->map!=0)
     {
@@ -61,9 +51,7 @@ static int grow_file(struct mmbuf__obj *m, const long long amount)
         void *new_mapping = mremap(m->map, old_file_size, m->filesize, MREMAP_MAYMOVE);
         if (new_mapping == MAP_FAILED)
         {
-            close(m->fd);
-            perror("Error remapping the file\n");
-            exit(EXIT_FAILURE);
+            handle_error(m, "Error remapping the file\n");
         }
         m->map = new_mapping;
     }
@@ -75,19 +63,21 @@ int mmbuf__setup(struct mmbuf__obj *m, const char *file_path, const char *mode)
     //printf("opening the file %s\n", file_path);
     // OPEN THE FILE
     if (mode[0]=='r')
+    {
         m->fd = open(file_path, O_RDONLY, 0754);
+    }
     else if (mode[0]=='w')
     {
         m->fd = open(file_path, O_RDWR|O_TRUNC|O_CREAT, 0600);
     }
     else
     {
-        printf("I don't understand the mode %s, should start with r, or w", mode);
+        fprintf(stderr, "I don't understand the mode %s, should start with r, or w", mode);
         exit(EXIT_FAILURE);
     }
     if (m->fd == -1) 
     {
-        perror("Error opening file");
+        fprintf(stderr, "Error opening file");
         exit(EXIT_FAILURE);
     }
     m->mode = mode[0];
@@ -102,8 +92,7 @@ int mmbuf__setup(struct mmbuf__obj *m, const char *file_path, const char *mode)
         if (curpos!=0 || m->filesize < 0)
         {
             fprintf(stderr, "Seek failed %ld\n", curpos);
-            perror("Error");
-            return 1; 
+            exit(EXIT_FAILURE); 
         }
         m->map = mmap(0, m->filesize, PROT_READ, MAP_SHARED, m->fd, 0);
     }
@@ -114,7 +103,7 @@ int mmbuf__setup(struct mmbuf__obj *m, const char *file_path, const char *mode)
     }
     if (m->map == MAP_FAILED)
     {
-        handle_mmap_fail(m);
+        handle_error(m, "Error mmapping the file");
     }
     
     int flags;
@@ -127,7 +116,7 @@ int mmbuf__setup(struct mmbuf__obj *m, const char *file_path, const char *mode)
     char madvise_ret = madvise(m->map, m->filesize, flags);
     if (madvise_ret != 0) 
     {
-        handle_madvise_error(m);
+        handle_error(m, "Error madvise the file");
     }  
     m->free_boundary = 0;
 
@@ -152,12 +141,12 @@ int mmbuf__teardown(const struct mmbuf__obj *m)
     return 0;
 }
 
-int mmbuf__get_data(const struct mmbuf__obj *m, void **result_p, const long long offset, const int length)  // This should be a void pointer
+unsigned int mmbuf__get_data(const struct mmbuf__obj *m, void **result_p, const off_t offset, const unsigned int length)  // This should be a void pointer
 {
     if (offset>(m->filesize))
         return 0;
 
-    int available_data;
+    unsigned int available_data;
     if (offset+length>(m->filesize))
         available_data = (m->filesize) - offset;
     else
@@ -170,7 +159,7 @@ int mmbuf__get_data(const struct mmbuf__obj *m, void **result_p, const long long
     return available_data;
 }
 
-int mmbuf__free_data(struct mmbuf__obj *m, const long long low, const long long high)   // Not using high at the moment, jsut freeing everything upto low.
+int mmbuf__free_data(struct mmbuf__obj *m, const off_t low, const off_t high)   // Not using high at the moment, jsut freeing everything upto low.
 {
     if (low==0)
     {   
@@ -190,7 +179,7 @@ int mmbuf__free_data(struct mmbuf__obj *m, const long long low, const long long 
         if (madvise_ret != 0) 
         {
             printf("Error number %d\n", errno);
-            handle_madvise_error(m);
+            handle_error(m, "Error madvise the file");
         }
         else
         {
@@ -215,7 +204,7 @@ int mmbuf__append(struct mmbuf__obj *m, const void *source, const unsigned int l
     return 0;
 }
 
-signed long long mmbuf__pos_alloc(struct mmbuf__obj *m, const unsigned int length)
+off_t mmbuf__pos_alloc(struct mmbuf__obj *m, const unsigned int length)
 {
     while ((m->offset + length) > (m->filesize))
     {
@@ -223,12 +212,12 @@ signed long long mmbuf__pos_alloc(struct mmbuf__obj *m, const unsigned int lengt
         grow_file(m, m->filesize*1.5);
         printf("new_size='%ld' new_map_pt='%p'\n", m->filesize, m->map);
     }
-    signed long long offset = m->offset;
+    off_t offset = m->offset;
     m->offset += length;
     return offset;
 }
 
-void *mmbuf__pos_tmpptr(struct mmbuf__obj *m, const signed long long position)
+void *mmbuf__pos_tmpptr(struct mmbuf__obj *m, const off_t position)
 {
     return (void *) ((char *)(m->map)+position);
 }
